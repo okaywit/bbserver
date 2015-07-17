@@ -14,36 +14,26 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import com.bbcow.po.DailyMain;
 
 public class HtmlParser {
-        public static DailyMain getPhotoTop() {
+        public static String getNews() {
+                StringBuffer allcon = new StringBuffer();
                 InputStream is = null;
                 BufferedReader br = null;
-                DailyMain wm = new DailyMain();
 
                 HttpClient client = new DefaultHttpClient();
                 try {
-                        //http://imgur.com/top
-                        HttpResponse response = client.execute(new HttpGet("http://localhost/test.html"));
+                        HttpResponse response = client.execute(new HttpGet("http://news.google.com/nwshp?hl=zh-CN&tab=wn"));
                         HttpEntity entity = response.getEntity();
 
                         is = entity.getContent();
 
                         br = new BufferedReader(new InputStreamReader(is, "utf-8"));
-                        br.skip(8725l * 4 + 2400);
 
-                        char[] cs = new char[1000];
-                        br.read(cs);
+                        String con = "";
 
-                        StringBuffer str = new StringBuffer();
-                        for (char c : cs) {
-                                str.append(c);
-                                System.out.print(c);
+                        while ((con = br.readLine()) != null) {
+                                allcon.append(con);
                         }
-                        str.delete(0, str.indexOf("src") + 5);
-                        wm.setImgUrl("https:" + str.substring(0, str.indexOf("\"")));
-                        str.delete(0, str.indexOf("href") + 6);
-                        wm.setLinkUrl("https://en.m.wikipedia.org" + str.substring(0, str.indexOf("\"")));
-                        str.delete(0, str.indexOf("title") + 7);
-                        wm.setTitle(str.substring(0, str.indexOf("\"")));
+
                 } catch (IOException e) {
                         e.printStackTrace();
                 } finally {
@@ -54,7 +44,7 @@ public class HtmlParser {
                                 e.printStackTrace();
                         }
                 }
-                return wm;
+                return allcon.toString();
         }
 
         public static DailyMain getWikiMain() {
@@ -101,7 +91,4 @@ public class HtmlParser {
                 return wm;
         }
 
-        public static void main(String[] args) {
-                HtmlParser.getPhotoTop();
-        }
 }

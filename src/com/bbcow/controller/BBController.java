@@ -17,7 +17,7 @@ import com.bbcow.util.RequestParam;
  * 
  * @author 大辉Face
  */
-@ServerEndpoint(value = "/bb", configurator = ServerConfigurator.class)
+@ServerEndpoint(value = "/index", configurator = ServerConfigurator.class)
 public class BBController extends AbstractController {
         @OnOpen
         @Override
@@ -28,6 +28,9 @@ public class BBController extends AbstractController {
                 try {
                         for (String s : MongoPool.findIndex()) {
                                 session.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_AD, s));
+                        }
+                        for (String s : MongoPool.findHost()) {
+                                session.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_SHAREHOST, s));
                         }
 
                         session.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_DAILYMAIN, MongoPool.findMain()));

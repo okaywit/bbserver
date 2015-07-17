@@ -10,6 +10,7 @@ public class TimerControler {
 
         public static void init() {
                 t.schedule(new MainTask(), 0, 24 * 60 * 60 * 1000);
+                //t.schedule(new NewsTask(), 0, 60 * 60 * 1000);
         }
 
         static class MainTask extends TimerTask {
@@ -17,6 +18,15 @@ public class TimerControler {
                 @Override
                 public void run() {
                         MongoPool.insertDailyMain(HtmlParser.getWikiMain());
+                }
+
+        }
+
+        static class NewsTask extends TimerTask {
+
+                @Override
+                public void run() {
+                        MongoPool.insertGoogleNews(HtmlParser.getNews());
                 }
 
         }

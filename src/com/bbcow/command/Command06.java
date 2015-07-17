@@ -25,6 +25,7 @@ public class Command06 implements ICommand {
                 host.setPoint(object.getString("point"));
                 host.setPort(object.getString("port"));
                 host.setName(object.getString("name"));
+                host.setPath(object.getString("path"));
                 MongoPool.insertHost(host);
 
                 try {

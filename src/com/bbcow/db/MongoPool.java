@@ -66,7 +66,15 @@ public class MongoPool {
                 top.forEach(new Block<Document>() {
                         @Override
                         public void apply(final Document document) {
-                                jsons.add("{\"name\":\"" + document.getString("name") + "\",\"id\":\"" + document.getObjectId("_id") + "\",\"type\":\"" + document.getString("type") + "\"}");
+                                jsons.add("{\"name\":\""
+                                        + document.getString("name")
+                                        + "\",\"id\":\""
+                                        + document.getObjectId("_id")
+                                        + "\",\"type\":\""
+                                        + document.getString("type")
+                                        + "\",\"path\":\""
+                                        + document.getString("path")
+                                        + "\"}");
                         }
                 });
 
@@ -87,6 +95,7 @@ public class MongoPool {
                                 host.setName(document.getString("name"));
                                 host.setPoint(document.getString("point"));
                                 host.setPort(document.getString("port"));
+                                host.setPath(document.getString("path"));
                                 host.setType(Integer.parseInt(document.getString("type")));
                                 host.setStatus(document.getInteger("status", 0));
 
@@ -97,8 +106,8 @@ public class MongoPool {
                 return hosts;
         }
 
-        public static ShareHost findOneHost(String id) {
-                FindIterable<Document> top = db.getCollection("share_host").find(BsonDocument.parse("{\"_id\":ObjectId(\"" + id + "\")}"));
+        public static ShareHost findOneHost(String name) {
+                FindIterable<Document> top = db.getCollection("share_host").find(BsonDocument.parse("{\"path\":\"" + name + "\"}"));
                 Document document = top.first();
 
                 ShareHost host = new ShareHost();
@@ -107,6 +116,7 @@ public class MongoPool {
                 host.setName(document.getString("name"));
                 host.setPoint(document.getString("point"));
                 host.setPort(document.getString("port"));
+                host.setPath(document.getString("path"));
                 host.setType(Integer.parseInt(document.getString("type")));
                 host.setStatus(Integer.parseInt(document.getString("status")));
                 return host;
@@ -190,6 +200,7 @@ public class MongoPool {
                                 .append("point", host.getPoint())
                                 .append("email", host.getEmail())
                                 .append("name", host.getName())
+                                .append("path", host.getPath())
                                 .append("type", 0)
                                 .append("status", 0));
         }
@@ -223,6 +234,17 @@ public class MongoPool {
                 FindIterable<Document> iterable = db.getCollection("daily_main").find().sort(BsonDocument.parse("{createDate:-1}"));
                 Document document = iterable.first();
                 return document.toJson();
+        }
+
+        public static String findGoogleNews() {
+                FindIterable<Document> iterable = db.getCollection("google_news").find().sort(BsonDocument.parse("{createDate:-1}"));
+                Document document = iterable.first();
+                return document.getString("content");
+        }
+
+        public static void insertGoogleNews(String news) {
+                db.getCollection("google_news").insertOne(new Document("content", news).append("createDate", new Date()));
+
         }
 
         public static void insertPaperTrend(long paperId, int type) {

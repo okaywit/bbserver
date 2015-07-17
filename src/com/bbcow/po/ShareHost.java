@@ -8,6 +8,7 @@ public class ShareHost {
         private String name;
         private int status;
         private int type;
+        private String path;
 
         public String getIp() {
                 return ip;
@@ -63,6 +64,14 @@ public class ShareHost {
 
         public void setType(int type) {
                 this.type = type;
+        }
+
+        public String getPath() {
+                return path;
+        }
+
+        public void setPath(String path) {
+                this.path = path;
         }
 
 }
