@@ -27,8 +27,8 @@ import com.bbcow.po.ShareHost;
  */
 @ServerEndpoint(value = "/open/{path}", configurator = ServerConfigurator.class)
 public class OpenController {
-        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-        Session hostSession = null;
+        private WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+        private Session hostSession = null;
 
         /**
          * 用户连接
@@ -36,9 +36,20 @@ public class OpenController {
         @OnOpen
         public void open(@PathParam(value = "path") String path, final Session userSession) {
                 try {
-                        ShareHost host = MongoPool.findOneHost(path);
-                        String uri = "ws://" + host.getIp() + ":" + host.getPort() + "/" + host.getPoint();
-                        hostSession = container.connectToServer(HostConnectCenter.class, new URI(uri));
+                	
+                		String uri ="";
+                		if(DefaultHost.isDefault(path)){
+                			uri="ws://localhost:8001/"+path;
+                		}else{
+                			ShareHost host = MongoPool.findOneHost(path);
+                			if(host==null){
+                				userSession.getBasicRemote().sendText("{\"type\":0,\"error\":\"未找到主机\"}");
+                				return;
+                			}
+                			uri = "ws://" + host.getIp() + ":" + host.getPort() + "/" + host.getPoint();
+                		}
+                		
+                		hostSession = container.connectToServer(HostConnectCenter.class, new URI(uri));
                         hostSession.addMessageHandler(new MessageHandler.Whole<String>() {
                                 @Override
                                 public void onMessage(String message) {
@@ -49,6 +60,7 @@ public class OpenController {
                                         }
                                 }
                         });
+                        
                 } catch (DeploymentException | IOException | URISyntaxException e) {
                         e.printStackTrace();
                 }
@@ -70,4 +82,22 @@ public class OpenController {
         @OnClose
         public void close(Session session) {
         }
+        
+
+		private enum DefaultHost{
+			INDEX("index"),BOX("box"),SHARE("share");
+			private String path;
+			DefaultHost(String path){
+				this.path = path;
+			}
+			
+			public static boolean isDefault(String path){
+				for(DefaultHost host : DefaultHost.values()){
+					if(host.path.equals(path)){
+						return true;
+					}
+				}
+				return false;
+			}
+		}
 }

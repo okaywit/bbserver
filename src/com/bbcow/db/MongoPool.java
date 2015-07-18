@@ -109,17 +109,20 @@ public class MongoPool {
         public static ShareHost findOneHost(String name) {
                 FindIterable<Document> top = db.getCollection("share_host").find(BsonDocument.parse("{\"path\":\"" + name + "\"}"));
                 Document document = top.first();
-
-                ShareHost host = new ShareHost();
-                host.setIp(document.getString("ip"));
-                host.setEmail(document.getString("email"));
-                host.setName(document.getString("name"));
-                host.setPoint(document.getString("point"));
-                host.setPort(document.getString("port"));
-                host.setPath(document.getString("path"));
-                host.setType(Integer.parseInt(document.getString("type")));
-                host.setStatus(Integer.parseInt(document.getString("status")));
-                return host;
+                if(document!=null){
+	                ShareHost host = new ShareHost();
+	                host.setIp(document.getString("ip"));
+	                host.setEmail(document.getString("email"));
+	                host.setName(document.getString("name"));
+	                host.setPoint(document.getString("point"));
+	                host.setPort(document.getString("port"));
+	                host.setPath(document.getString("path"));
+	                host.setType(Integer.parseInt(document.getString("type")));
+	                host.setStatus(Integer.parseInt(document.getString("status")));
+	                return host;
+                }else{
+                	return null;
+                }
         }
 
         /**
@@ -127,8 +130,7 @@ public class MongoPool {
          */
         public static String findDailyFirst() {
                 FindIterable<Document> current =
-                        db
-                                .getCollection("paper")
+                        db.getCollection("paper")
                                 .find(BsonDocument.parse("{createDate:{$gte:ISODate('" + sFormat.format(new Date()) + "T00:00:00.000Z')}}"))
                                 .sort(BsonDocument.parse("{goodCount:-1}"))
                                 .limit(1);

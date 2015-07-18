@@ -17,8 +17,8 @@ import com.bbcow.util.RequestParam;
  * 
  * @author 大辉Face
  */
-@ServerEndpoint(value = "/chat", configurator = ServerConfigurator.class)
-public class ChatController extends AbstractController {
+@ServerEndpoint(value = "/box", configurator = ServerConfigurator.class)
+public class BoxController extends AbstractController {
         @OnOpen
         @Override
         public void open(Session session) {
