@@ -106,8 +106,8 @@ public class MongoPool {
                 return hosts;
         }
 
-        public static ShareHost findOneHost(String name) {
-                FindIterable<Document> top = db.getCollection("share_host").find(BsonDocument.parse("{\"path\":\"" + name + "\"}"));
+        public static ShareHost findOneHost(String path) {
+                FindIterable<Document> top = db.getCollection("share_host").find(BsonDocument.parse("{\"path\":\"" + path + "\"}"));
                 Document document = top.first();
                 if(document!=null){
 	                ShareHost host = new ShareHost();

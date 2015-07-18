@@ -26,10 +26,17 @@ public class Command06 implements ICommand {
                 host.setPort(object.getString("port"));
                 host.setName(object.getString("name"));
                 host.setPath(object.getString("path"));
-                MongoPool.insertHost(host);
-
+                
+                
                 try {
-                        session.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_SUCCESS, "{\"success\":\"分享完成\"}"));
+                		if(MongoPool.findOneHost(object.getString("path"))!=null){
+                    
+                			MongoPool.insertHost(host);
+                			session.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_SUCCESS, "{\"success\":\"分享完成\"}"));
+               
+                		}else{
+                			session.getBasicRemote().sendText("{\"type\":0,\"error\":\"英文别名已存在\"}");
+                		}
                 } catch (IOException e) {
                         e.printStackTrace();
                 }
