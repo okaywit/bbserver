@@ -1,8 +1,12 @@
 package com.bbcow.util;
 
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.websocket.Session;
+
+import com.bbcow.CowCache;
 import com.bbcow.db.MongoPool;
 
 public class TimerControler {
@@ -26,7 +30,13 @@ public class TimerControler {
 
                 @Override
                 public void run() {
-                        MongoPool.insertGoogleNews(HtmlParser.getNews());
+                	
+                	for(Iterator<Session> ss = CowCache.hostMap.values().iterator();ss.hasNext();){
+                		
+                	}
+                	
+                	
+                    MongoPool.insertGoogleNews(HtmlParser.getNews());
                 }
 
         }

@@ -2,6 +2,8 @@ package com.bbcow.command;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.websocket.Session;
 
@@ -17,21 +19,17 @@ import com.bbcow.util.RequestParam;
 public class Command04 implements ICommand {
 
         @Override
-        public void process(String message, Session session) {
+        public List<String> process(String message, Session session) {
                 JSONObject object = JSONObject.parseObject(message);
                 String fakeName = object.getString("fakeName");
                 //过滤 ## 标示
                 String paperId = object.getString("paperId").replaceAll("#", "");
 
                 String ad = MongoPool.findOne(Long.parseLong(paperId));
-                for (Iterator<CowSession> it = CowCache.cowMap.values().iterator(); it.hasNext();) {
-                        try {
-                                Session s = it.next().getSession();
-                                s.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_PUSH, ad));
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        }
-                }
+
+                List<String> list = new LinkedList<String>();
+                list.add(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_PUSH, ad));
+                return list;
         }
 
 }

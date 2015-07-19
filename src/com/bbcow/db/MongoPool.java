@@ -25,7 +25,8 @@ public class MongoPool {
         private static SimpleDateFormat sFormat = new SimpleDateFormat("yyyy-MM-dd");
         private static MongoClient mongoClient;
         private static MongoDatabase db;
-        static {
+        
+        public static void init() {
                 mongoClient = new MongoClient("127.0.0.1", 27017);
                 db = mongoClient.getDatabase("okaywit");
         }
@@ -82,7 +83,7 @@ public class MongoPool {
         }
 
         public static List<ShareHost> findBBHost() {
-                FindIterable<Document> top = db.getCollection("share_host").find(BsonDocument.parse("{\"type\":\"0\"}"));
+                FindIterable<Document> top = db.getCollection("share_host").find();//BsonDocument.parse("{\"type\":\"0\"}")
 
                 final List<ShareHost> hosts = new LinkedList<ShareHost>();
 
@@ -97,7 +98,7 @@ public class MongoPool {
                                 host.setPort(document.getString("port"));
                                 host.setPath(document.getString("path"));
                                 host.setType(Integer.parseInt(document.getString("type")));
-                                host.setStatus(document.getInteger("status", 0));
+                                host.setStatus(Integer.parseInt(document.getString("status")));
 
                                 hosts.add(host);
                         }

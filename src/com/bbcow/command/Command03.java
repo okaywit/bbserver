@@ -1,12 +1,9 @@
 package com.bbcow.command;
 
-import java.io.IOException;
-import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.websocket.Session;
-
-import com.bbcow.CowCache;
-import com.bbcow.CowSession;
 import com.bbcow.util.RequestParam;
 
 /**
@@ -15,15 +12,10 @@ import com.bbcow.util.RequestParam;
 public class Command03 implements ICommand {
 
         @Override
-        public void process(String message, Session session) {
-                for (Iterator<CowSession> it = CowCache.cowMap.values().iterator(); it.hasNext();) {
-                        try {
-                                Session s = it.next().getSession();
-                                s.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_CHAT, message));
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        }
-                }
+        public List<String> process(String message, Session session) {
+                List<String> list = new LinkedList<String>();
+                list.add(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_CHAT, message));
+                return list;
         }
 
 }

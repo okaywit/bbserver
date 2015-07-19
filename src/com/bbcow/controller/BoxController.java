@@ -17,14 +17,13 @@ import com.bbcow.util.RequestParam;
  * 
  * @author 大辉Face
  */
-@ServerEndpoint(value = "/box", configurator = ServerConfigurator.class)
+@ServerEndpoint(value = "/chat", configurator = ServerConfigurator.class)
 public class BoxController extends AbstractController {
         @OnOpen
         @Override
         public void open(Session session) {
 
                 long index = cowIndex.getAndIncrement();
-                CowCache.cowMap.put(session.getId(), new CowSession(index, session));
                 String dailyTop = MongoPool.findDailyFirst();
                 try {
                         if (dailyTop != null)

@@ -1,7 +1,10 @@
 package com.bbcow.command;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.websocket.Session;
 
@@ -18,7 +21,7 @@ import com.bbcow.util.RequestParam;
 public class Command01 implements ICommand {
 
         @Override
-        public void process(String message, Session session) {
+        public List<String> process(String message, Session session) {
                 JSONObject object = JSONObject.parseObject(message);
                 Paper paper = new Paper();
                 paper.setId(System.currentTimeMillis());
@@ -34,14 +37,9 @@ public class Command01 implements ICommand {
 
                 MongoPool.insertPaper(paper);
 
-                for (Iterator<CowSession> it = CowCache.cowMap.values().iterator(); it.hasNext();) {
-                        try {
-                                Session s = it.next().getSession();
-                                s.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_AD, JSONObject.toJSONString(paper)));
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        }
-                }
+                List<String> list = new LinkedList<String>();
+                list.add(RequestParam.MESSAGE_TYPE_AD, JSONObject.toJSONString(paper));
+                return list;
 
         }
 

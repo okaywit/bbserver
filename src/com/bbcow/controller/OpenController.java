@@ -15,10 +15,12 @@ import javax.websocket.WebSocketContainer;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import com.bbcow.CowCache;
 import com.bbcow.ServerConfigurator;
 import com.bbcow.controller.client.HostConnectCenter;
 import com.bbcow.db.MongoPool;
 import com.bbcow.po.ShareHost;
+import com.bbcow.util.RequestParam;
 
 /**
  * 访问指定主机
@@ -27,43 +29,28 @@ import com.bbcow.po.ShareHost;
  */
 @ServerEndpoint(value = "/open/{path}", configurator = ServerConfigurator.class)
 public class OpenController {
-        private WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         private Session hostSession = null;
 
         /**
          * 用户连接
          */
         @OnOpen
-        public void open(@PathParam(value = "path") String path, final Session userSession) {
-                try {
-                	
-                		String uri ="";
-                		if(DefaultHost.isDefault(path)){
-                			uri="ws://localhost:8001/"+path;
-                		}else{
-                			ShareHost host = MongoPool.findOneHost(path);
-                			if(host==null){
-                				userSession.getBasicRemote().sendText("{\"type\":0,\"error\":\"未找到主机\"}");
-                				return;
-                			}
-                			uri = "ws://" + host.getIp() + ":" + host.getPort() + "/" + host.getPoint();
-                		}
-                		
-                		hostSession = container.connectToServer(HostConnectCenter.class, new URI(uri));
-                        hostSession.addMessageHandler(new MessageHandler.Whole<String>() {
-                                @Override
-                                public void onMessage(String message) {
-                                        try {
-                                                userSession.getBasicRemote().sendText(message);
-                                        } catch (IOException e) {
-                                                e.printStackTrace();
-                                        }
-                                }
-                        });
-                        
-                } catch (DeploymentException | IOException | URISyntaxException e) {
-                        e.printStackTrace();
-                }
+        public void userConnect(@PathParam(value = "path") String path, final Session userSession) {
+        	//TODO 加载一个list,来初始化存储所有在线服务器的数据,定时更新
+        	CowCache.userMap.put(userSession.getId(), userSession);
+        	//检测远程主机是否加载
+        	while(true){
+        		hostSession = CowCache.hostMap.get(path);
+	            if(hostSession==null){
+	            	if(CowCache.initHost(path)){
+	            		continue;
+	            	}else{
+	            		//TODO 发送错误信息
+	            		return;
+	            	}
+	            }
+	            break;
+        	}
 
         }
 
@@ -71,18 +58,20 @@ public class OpenController {
          * 用户发送消息
          */
         @OnMessage
-        public void userMessage(String message) {
+        public void userMessage(String message,Session userSession) {
                 try {
-                        hostSession.getBasicRemote().sendText(message);
-                } catch (IOException e) {
-                        e.printStackTrace();
-                }
+					hostSession.getBasicRemote().sendText(message);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+                
         }
 
         @OnClose
-        public void close(Session session) {
+        public void userQuit(Session userSession) {
+        	CowCache.userMap.remove(userSession.getId());
         }
-        
+        /*
 
 		private enum DefaultHost{
 			INDEX("index"),BOX("box"),SHARE("share");
@@ -99,5 +88,5 @@ public class OpenController {
 				}
 				return false;
 			}
-		}
+		}*/
 }

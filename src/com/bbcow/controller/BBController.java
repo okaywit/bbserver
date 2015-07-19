@@ -22,8 +22,6 @@ public class BBController extends AbstractController {
         @OnOpen
         @Override
         public void open(Session session) {
-                long index = cowIndex.getAndIncrement();
-                CowCache.cowMap.put(session.getId(), new CowSession(index, session));
 
                 try {
                         for (String s : MongoPool.findIndex()) {

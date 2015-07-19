@@ -1,5 +1,6 @@
 package com.bbcow.controller;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicLong;
@@ -15,6 +16,7 @@ import org.apache.log4j.PropertyConfigurator;
 import com.bbcow.CowCache;
 import com.bbcow.util.BaiduPing;
 import com.bbcow.util.BusTask;
+import com.bbcow.util.RequestParam;
 
 /**
  * 中央控制器
@@ -44,7 +46,6 @@ public abstract class AbstractController {
         @OnClose
         public void close(Session session) {
                 logger.info(session.getId() + " go away! ");
-                CowCache.cowMap.remove(session.getId());
         }
 
         @OnError

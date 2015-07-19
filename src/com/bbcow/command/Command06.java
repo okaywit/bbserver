@@ -1,6 +1,7 @@
 package com.bbcow.command;
 
-import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.websocket.Session;
 
@@ -17,7 +18,7 @@ import com.bbcow.util.RequestParam;
 public class Command06 implements ICommand {
 
         @Override
-        public void process(String message, Session session) {
+        public List<String> process(String message, Session session) {
                 JSONObject object = JSONObject.parseObject(message);
                 ShareHost host = new ShareHost();
                 host.setIp(object.getString("ip"));
@@ -27,19 +28,17 @@ public class Command06 implements ICommand {
                 host.setName(object.getString("name"));
                 host.setPath(object.getString("path"));
                 
-                
-                try {
-                		if(MongoPool.findOneHost(object.getString("path"))!=null){
+                List<String> list = new LinkedList<String>();
+                if(MongoPool.findOneHost(object.getString("path"))!=null){
                     
-                			MongoPool.insertHost(host);
-                			session.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_SUCCESS, "{\"success\":\"分享完成\"}"));
-               
-                		}else{
-                			session.getBasicRemote().sendText("{\"type\":0,\"error\":\"英文别名已存在\"}");
-                		}
-                } catch (IOException e) {
-                        e.printStackTrace();
-                }
+        			MongoPool.insertHost(host);
+        			list.add(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_SUCCESS, "{\"success\":\"分享完成\"}"));
+       
+        		}else{
+        			list.add("{\"type\":0,\"error\":\"英文别名已存在\"}");
+        		}
+                
+                return list;
 
         }
 }

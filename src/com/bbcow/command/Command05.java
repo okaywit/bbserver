@@ -1,6 +1,7 @@
 package com.bbcow.command;
 
-import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.websocket.Session;
 
@@ -16,25 +17,18 @@ import com.bbcow.util.RequestParam;
 public class Command05 implements ICommand {
 
         @Override
-        public void process(String message, Session session) {
-                try {
-                        JSONObject object = JSONObject.parseObject(message);
-
-                        int conditionType = object.getIntValue("type");
-
-                        if (conditionType == RequestParam.MESSAGE_TYPE_YESTERDAY) {
-                                for (String s : MongoPool.findYesterday()) {
-                                        session.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_YESTERDAY, s));
-                                }
-                        }
-                        if (conditionType == RequestParam.MESSAGE_TYPE_TOP100) {
-                                for (String s : MongoPool.findTop100()) {
-                                        session.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_TOP100, s));
-                                }
-                        }
-
-                } catch (IOException e) {
-                        e.printStackTrace();
+        public List<String> process(String message, Session session) {
+        		List<String> list = new LinkedList<String>();
+                JSONObject object = JSONObject.parseObject(message);
+                int conditionType = object.getIntValue("type");
+                
+                if (conditionType == RequestParam.MESSAGE_TYPE_YESTERDAY) {
+                	list.addAll(MongoPool.findYesterday());
                 }
+                if (conditionType == RequestParam.MESSAGE_TYPE_TOP100) {
+                	list.addAll(MongoPool.findTop100());
+                }
+
+                return list;
         }
 }
