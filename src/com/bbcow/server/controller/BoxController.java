@@ -1,0 +1,34 @@
+package com.bbcow.server.controller;
+
+import java.io.IOException;
+
+import javax.websocket.OnOpen;
+import javax.websocket.Session;
+import javax.websocket.server.ServerEndpoint;
+
+import com.bbcow.ServerConfigurator;
+import com.bbcow.db.MongoPool;
+import com.bbcow.server.util.RequestParam;
+
+/**
+ * 聊天
+ * 
+ * @author 大辉Face
+ */
+@ServerEndpoint(value = "/chat", configurator = ServerConfigurator.class)
+public class BoxController extends AbstractController {
+        @OnOpen
+        @Override
+        public void open(Session session) {
+
+                long index = cowIndex.getAndIncrement();
+                String dailyTop = MongoPool.findDailyFirst();
+                try {
+                        if (dailyTop != null)
+                                session.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_PUSH, dailyTop));
+                } catch (IOException e) {
+                        e.printStackTrace();
+                }
+
+        }
+}

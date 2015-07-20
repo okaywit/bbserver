@@ -8,9 +8,9 @@ import java.util.List;
 import org.bson.BsonDocument;
 import org.bson.Document;
 
-import com.bbcow.po.DailyMain;
-import com.bbcow.po.Paper;
-import com.bbcow.po.ShareHost;
+import com.bbcow.server.po.DailyMain;
+import com.bbcow.server.po.Paper;
+import com.bbcow.server.po.ShareHost;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
@@ -25,7 +25,7 @@ public class MongoPool {
         private static SimpleDateFormat sFormat = new SimpleDateFormat("yyyy-MM-dd");
         private static MongoClient mongoClient;
         private static MongoDatabase db;
-        
+
         public static void init() {
                 mongoClient = new MongoClient("127.0.0.1", 27017);
                 db = mongoClient.getDatabase("okaywit");
@@ -38,6 +38,7 @@ public class MongoPool {
                 FindIterable<Document> top = db.getCollection("paper").find().sort(BsonDocument.parse("{goodCount:-1}")).limit(2);
 
                 FindIterable<Document> current = db.getCollection("paper").find(BsonDocument.parse("{createDate:{$gte:ISODate('" + sFormat.format(new Date()) + "T00:00:00.000Z')}}"));
+
                 final List<String> jsons = new LinkedList<String>();
 
                 top.forEach(new Block<Document>() {
@@ -48,6 +49,7 @@ public class MongoPool {
                 });
 
                 current.forEach(new Block<Document>() {
+
                         @Override
                         public void apply(final Document document) {
                                 jsons.add(document.toJson());
@@ -110,19 +112,19 @@ public class MongoPool {
         public static ShareHost findOneHost(String path) {
                 FindIterable<Document> top = db.getCollection("share_host").find(BsonDocument.parse("{\"path\":\"" + path + "\"}"));
                 Document document = top.first();
-                if(document!=null){
-	                ShareHost host = new ShareHost();
-	                host.setIp(document.getString("ip"));
-	                host.setEmail(document.getString("email"));
-	                host.setName(document.getString("name"));
-	                host.setPoint(document.getString("point"));
-	                host.setPort(document.getString("port"));
-	                host.setPath(document.getString("path"));
-	                host.setType(Integer.parseInt(document.getString("type")));
-	                host.setStatus(Integer.parseInt(document.getString("status")));
-	                return host;
-                }else{
-                	return null;
+                if (document != null) {
+                        ShareHost host = new ShareHost();
+                        host.setIp(document.getString("ip"));
+                        host.setEmail(document.getString("email"));
+                        host.setName(document.getString("name"));
+                        host.setPoint(document.getString("point"));
+                        host.setPort(document.getString("port"));
+                        host.setPath(document.getString("path"));
+                        host.setType(Integer.parseInt(document.getString("type")));
+                        host.setStatus(Integer.parseInt(document.getString("status")));
+                        return host;
+                } else {
+                        return null;
                 }
         }
 
@@ -131,7 +133,8 @@ public class MongoPool {
          */
         public static String findDailyFirst() {
                 FindIterable<Document> current =
-                        db.getCollection("paper")
+                        db
+                                .getCollection("paper")
                                 .find(BsonDocument.parse("{createDate:{$gte:ISODate('" + sFormat.format(new Date()) + "T00:00:00.000Z')}}"))
                                 .sort(BsonDocument.parse("{goodCount:-1}"))
                                 .limit(1);
@@ -253,6 +256,19 @@ public class MongoPool {
         public static void insertPaperTrend(long paperId, int type) {
                 db.getCollection("paper_trend").insertOne(new Document("paper_id", paperId).append("type", type).append("ip", "").append("createDate", new Date()));
 
+        }
+
+        public static List<String> findPaperTrend() {
+                FindIterable<Document> iterable = db.getCollection("paper_trend").find();
+                final List<String> jsons = new LinkedList<String>();
+
+                iterable.forEach(new Block<Document>() {
+                        @Override
+                        public void apply(final Document document) {
+                                jsons.add(document.toJson());
+                        }
+                });
+                return jsons;
         }
 
         public static void doNotLike(long id) {
