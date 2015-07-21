@@ -20,6 +20,7 @@ public class Command06 implements ICommand {
         @Override
         public List<String> process(String message, Session session) {
                 JSONObject object = JSONObject.parseObject(message);
+                object = JSONObject.parseObject(object.getString("shareHost"));
                 ShareHost host = new ShareHost();
                 host.setIp(object.getString("ip"));
                 host.setEmail(object.getString("email"));
@@ -27,17 +28,17 @@ public class Command06 implements ICommand {
                 host.setPort(object.getString("port"));
                 host.setName(object.getString("name"));
                 host.setPath(object.getString("path"));
-                
+
                 List<String> list = new LinkedList<String>();
-                if(MongoPool.findOneHost(object.getString("path"))!=null){
-                    
-        			MongoPool.insertHost(host);
-        			list.add(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_SUCCESS, "{\"success\":\"分享完成\"}"));
-       
-        		}else{
-        			list.add("{\"type\":0,\"error\":\"英文别名已存在\"}");
-        		}
-                
+                if (MongoPool.findOneHost(object.getString("path")) == null) {
+
+                        MongoPool.insertHost(host);
+                        list.add(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_SUCCESS, "{\"success\":\"分享完成\"}"));
+
+                } else {
+                        list.add("{\"type\":0,\"error\":\"英文别名已存在\"}");
+                }
+
                 return list;
 
         }

@@ -39,13 +39,16 @@ public abstract class AbstractController {
         @OnMessage
         public void message(String message, Session session) {
                 JSONObject object = JSONObject.parseObject(message);
-                List<String> list = CowCache.commandMap.get(object.getInteger("cId")).process(message, session);
 
-                for (String msg : list) {
-                        try {
-                                session.getBasicRemote().sendText(msg);
-                        } catch (IOException e) {
-                                e.printStackTrace();
+                List<String> list = CowCache.commandMap.get(object.getInteger("mode")).process(message, session);
+
+                if (list != null) {
+                        for (String msg : list) {
+                                try {
+                                        session.getBasicRemote().sendText(msg);
+                                } catch (IOException e) {
+                                        e.printStackTrace();
+                                }
                         }
                 }
         }

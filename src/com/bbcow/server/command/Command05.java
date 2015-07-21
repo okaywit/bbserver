@@ -18,15 +18,14 @@ public class Command05 implements ICommand {
 
         @Override
         public List<String> process(String message, Session session) {
-        		List<String> list = new LinkedList<String>();
+                List<String> list = new LinkedList<String>();
                 JSONObject object = JSONObject.parseObject(message);
-                int conditionType = object.getIntValue("type");
-                
+                int conditionType = object.getIntValue("conditionType");
                 if (conditionType == RequestParam.MESSAGE_TYPE_YESTERDAY) {
-                	list.addAll(MongoPool.findYesterday());
+                        list.addAll(MongoPool.findYesterday());
                 }
                 if (conditionType == RequestParam.MESSAGE_TYPE_TOP100) {
-                	list.addAll(MongoPool.findTop100());
+                        list.addAll(MongoPool.findTop100());
                 }
 
                 return list;

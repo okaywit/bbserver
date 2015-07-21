@@ -10,8 +10,9 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
 import com.bbcow.ServerConfigurator;
+import com.bbcow.db.MongoPool;
 import com.bbcow.platform.HostCache;
-import com.bbcow.platform.ProtocolData;
+import com.bbcow.server.util.RequestParam;
 
 /**
  * 初始化
@@ -24,28 +25,22 @@ public class IndexController {
         public void open(Session userSession) {
                 HostCache.userMap.put(userSession.getId(), userSession);
 
-                for (Iterator<Session> it = HostCache.hostMap.values().iterator(); it.hasNext();) {
-                        Session hostSession = it.next();
-                        if (hostSession == null || !hostSession.isOpen()) {
-                                continue;
+                try {
+                        for (String s : MongoPool.findHost()) {
+                                userSession.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_SHAREHOST, s));
                         }
-                        ProtocolData data = new ProtocolData("{\"cId\":7,\"data\":{}}", userSession);
-                        try {
-                                hostSession.getBasicRemote().sendText(data.toString());
-                        } catch (IOException e) {
-                                e.printStackTrace();
+                        for (Iterator<String> it = HostCache.queue.iterator(); it.hasNext();) {
+                                userSession.getBasicRemote().sendText(it.next());
                         }
+                } catch (IOException e) {
+                        e.printStackTrace();
                 }
 
         }
 
         @OnMessage
         public void hostMessage(String message, Session session) {
-                /*try {
-                        session.getBasicRemote().sendText(new ProtocolData(message, session).toString());
-                } catch (IOException e) {
-                        e.printStackTrace();
-                }*/
+
         }
 
         @OnClose

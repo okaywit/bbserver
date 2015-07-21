@@ -8,9 +8,6 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 
-import com.alibaba.fastjson.JSONObject;
-import com.bbcow.platform.HostCache;
-
 @ClientEndpoint
 public class HostConnectCenter {
         @OnOpen
@@ -20,14 +17,19 @@ public class HostConnectCenter {
 
         @OnMessage
         public void hostMessage(String message, Session hostSession) {
-                JSONObject object = JSONObject.parseObject(message);
+                try {
+                        hostSession.getBasicRemote().sendText(message);
+                } catch (IOException e) {
+                        e.printStackTrace();
+                }
+                /*JSONObject object = JSONObject.parseObject(message);
                 //用户ID
                 String usi = object.getString("sId");
                 try {
                         HostCache.userMap.get(usi).getBasicRemote().sendText(message);
                 } catch (IOException e) {
                         e.printStackTrace();
-                }
+                }*/
         }
 
         @OnClose

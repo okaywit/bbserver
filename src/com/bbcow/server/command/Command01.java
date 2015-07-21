@@ -18,7 +18,7 @@ public class Command01 implements ICommand {
         @Override
         public List<String> process(String message, Session session) {
                 JSONObject object = JSONObject.parseObject(message);
-                object = object.getJSONObject("data");
+                object = object.getJSONObject("paper");
                 Paper paper = new Paper();
                 paper.setId(System.currentTimeMillis());
                 paper.setContactName(object.getString("contactName"));
@@ -34,7 +34,7 @@ public class Command01 implements ICommand {
                 MongoPool.insertPaper(paper);
 
                 List<String> list = new LinkedList<String>();
-                list.add(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_AD, object.getString("sId"), JSONObject.toJSONString(paper)));
+                list.add(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_AD, JSONObject.toJSONString(paper)));
                 return list;
 
         }

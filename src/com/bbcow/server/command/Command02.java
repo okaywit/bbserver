@@ -15,6 +15,7 @@ public class Command02 implements ICommand {
         @Override
         public List<String> process(String message, Session session) {
                 JSONObject object = JSONObject.parseObject(message);
+                object = object.getJSONObject("paperTrend");
                 int type = object.getIntValue("type");
                 long id = object.getLongValue("id");
                 if (type == 1)

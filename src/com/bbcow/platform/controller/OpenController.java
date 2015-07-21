@@ -1,17 +1,28 @@
 package com.bbcow.platform.controller;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.LinkedList;
+import java.util.List;
 
+import javax.websocket.ClientEndpoint;
+import javax.websocket.ContainerProvider;
+import javax.websocket.DeploymentException;
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
+import javax.websocket.WebSocketContainer;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import com.bbcow.BusCache;
 import com.bbcow.ServerConfigurator;
+import com.bbcow.db.MongoPool;
 import com.bbcow.platform.HostCache;
-import com.bbcow.platform.ProtocolData;
+import com.bbcow.platform.MessageTask;
+import com.bbcow.server.po.ShareHost;
 
 /**
  * 访问指定主机
@@ -20,32 +31,65 @@ import com.bbcow.platform.ProtocolData;
  */
 @ServerEndpoint(value = "/open/{path}", configurator = ServerConfigurator.class)
 public class OpenController {
+        private static WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         private Session hostSession = null;
+        private Session userSession = null;
 
         /**
          * 用户连接
          */
         @OnOpen
         public void userConnect(@PathParam(value = "path") String path, Session userSession) {
-                HostCache.userMap.put(userSession.getId(), userSession);
+                this.userSession = userSession;
+                List<Session> ss = HostCache.hostUserMap.get(path);
+                if (ss == null) {
+                        HostCache.hostUserMap.put(path, ss = new LinkedList<Session>());
+                }
+                ss.add(userSession);
 
-                //检测远程主机是否加载
-                while (true) {
-                        hostSession = HostCache.hostMap.get(path);
-                        if (hostSession == null || !hostSession.isOpen()) {
-                                if (HostCache.initHost(path)) {
-                                        continue;
-                                } else {
-                                        return;
-                                }
+                ShareHost host = MongoPool.findOneHost(path);
+                if (host != null && host.getStatus() == 1) {
+                        MongoPool.insertHostTrend(host);
+                        String uri = "ws://" + host.getIp() + ":" + host.getPort() + "/" + host.getPoint();
+                        try {
+                                hostSession = container.connectToServer(new Host(), new URI(uri));
+                        } catch (DeploymentException | IOException | URISyntaxException e) {
+                                e.printStackTrace();
                         }
-                        break;
+                } else {
+                        try {
+                                userSession.getBasicRemote().sendText("{\"type\":0,\"error\":\"未找到主机\"}");
+                        } catch (IOException e) {
+                                e.printStackTrace();
+                        }
+                }
+        }
+
+        @ClientEndpoint
+        class Host {
+
+                @OnMessage
+                public void hostMessage(String message, Session hostSession) {
+                        try {
+                                userSession.getBasicRemote().sendText(message);
+
+                                if (!HostCache.queue.contains(message)) {
+                                        if (!HostCache.queue.offer(message))
+                                                HostCache.queue.poll();
+                                }
+
+                        } catch (IOException e) {
+                                e.printStackTrace();
+                        }
                 }
 
-                try {
-                        hostSession.getBasicRemote().sendText("{\"sId\":\"" + userSession.getId() + "\"}");
-                } catch (IOException e) {
-                        e.printStackTrace();
+                @OnClose
+                public void hostQuit(Session hostSession) {
+                        try {
+                                userSession.close();
+                        } catch (IOException e) {
+                                e.printStackTrace();
+                        }
                 }
         }
 
@@ -55,7 +99,11 @@ public class OpenController {
         @OnMessage
         public void userMessage(String message, Session userSession) {
                 try {
-                        hostSession.getBasicRemote().sendText(new ProtocolData(message, userSession).toString());
+
+                        hostSession.getBasicRemote().sendText(message);
+
+                        BusCache.threads.execute(new MessageTask(message));
+
                 } catch (IOException e) {
                         e.printStackTrace();
                 }
@@ -63,8 +111,18 @@ public class OpenController {
         }
 
         @OnClose
-        public void userQuit(Session userSession) {
-                HostCache.userMap.remove(userSession.getId());
+        public void userQuit(@PathParam(value = "path") String path, Session userSession) {
+                System.out.println("-----1");
+                List<Session> ss = HostCache.hostUserMap.get(path);
+                int index = 0;
+                for (Session s : ss) {
+                        if (s.getId().equals(userSession.getId())) {
+                                index = ss.indexOf(s);
+                                break;
+                        }
+                }
+                ss.remove(index);
+
         }
 
 }

@@ -19,11 +19,16 @@ import com.bbcow.platform.controller.HostConnectCenter;
 import com.bbcow.server.po.ShareHost;
 
 public class HostCache {
+        //首页用户
         public static Map<String, Session> userMap = new HashMap<String, Session>();
+        //各主机用户
+        public static Map<String, List<Session>> hostUserMap = new HashMap<String, List<Session>>();
+
         public static Map<String, Session> hostMap = new HashMap<String, Session>();
         private static WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 
-        public static Queue<Object> queue = new LinkedBlockingQueue<Object>();
+        //随机访问
+        public static Queue<String> queue = new LinkedBlockingQueue<String>(50);
 
         //TODO 主机未启动处理
         public static void init() {
@@ -52,5 +57,20 @@ public class HostCache {
                         hostMap.put(host.getPath(), null);
                 }
                 return flag;
+        }
+
+        public static Session connect(String path) {
+                ShareHost host = MongoPool.findOneHost(path);
+                Session session = null;
+                if (host == null)
+                        return session;
+
+                String uri = "ws://" + host.getIp() + ":" + host.getPort() + "/" + host.getPoint();
+                try {
+                        session = container.connectToServer(HostConnectCenter.class, new URI(uri));
+                } catch (DeploymentException | IOException | URISyntaxException e) {
+                        e.printStackTrace();
+                }
+                return session;
         }
 }

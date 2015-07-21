@@ -17,7 +17,7 @@ public class Command04 implements ICommand {
         @Override
         public List<String> process(String message, Session session) {
                 JSONObject object = JSONObject.parseObject(message);
-                String fakeName = object.getString("fakeName");
+                object = object.getJSONObject("chatMessage");
                 //过滤 ## 标示
                 String paperId = object.getString("paperId").replaceAll("#", "");
 

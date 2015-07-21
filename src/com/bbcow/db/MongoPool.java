@@ -11,6 +11,7 @@ import org.bson.Document;
 import com.bbcow.server.po.DailyMain;
 import com.bbcow.server.po.Paper;
 import com.bbcow.server.po.ShareHost;
+import com.bbcow.server.util.RequestParam;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
@@ -73,10 +74,12 @@ public class MongoPool {
                                         + document.getString("name")
                                         + "\",\"id\":\""
                                         + document.getObjectId("_id")
-                                        + "\",\"type\":\""
-                                        + document.getString("type")
+                                        + "\",\"status\":\""
+                                        + document.getString("status")
                                         + "\",\"path\":\""
                                         + document.getString("path")
+                                        + "\",\"clickCount\":\""
+                                        + (document.getInteger("clickCount") == null ? 0 : document.getInteger("clickCount"))
                                         + "\"}");
                         }
                 });
@@ -107,6 +110,10 @@ public class MongoPool {
                 });
 
                 return hosts;
+        }
+
+        public static void insertHostTrend(ShareHost host) {
+                db.getCollection("share_host").updateOne(BsonDocument.parse("{\"path\":\"" + host.getPath() + "\"}"), BsonDocument.parse("{$inc:{clickCount:1}}"));
         }
 
         public static ShareHost findOneHost(String path) {
@@ -155,7 +162,7 @@ public class MongoPool {
                 top.forEach(new Block<Document>() {
                         @Override
                         public void apply(final Document document) {
-                                jsons.add(document.toJson());
+                                jsons.add(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_TOP100, document.toJson()));
                         }
                 });
                 return jsons;
@@ -183,7 +190,7 @@ public class MongoPool {
                 top.forEach(new Block<Document>() {
                         @Override
                         public void apply(final Document document) {
-                                jsons.add(document.toJson());
+                                jsons.add(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_YESTERDAY, document.toJson()));
                         }
                 });
                 return jsons;
@@ -207,8 +214,8 @@ public class MongoPool {
                                 .append("email", host.getEmail())
                                 .append("name", host.getName())
                                 .append("path", host.getPath())
-                                .append("type", 0)
-                                .append("status", 0));
+                                .append("type", "0")
+                                .append("status", "0"));
         }
 
         public static void insertPaper(Paper paper) {

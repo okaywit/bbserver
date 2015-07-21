@@ -2,15 +2,12 @@ package com.bbcow.server.controller;
 
 import java.io.IOException;
 
-import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-import com.alibaba.fastjson.JSONObject;
 import com.bbcow.ServerConfigurator;
 import com.bbcow.db.MongoPool;
-import com.bbcow.server.po.Paper;
 import com.bbcow.server.util.RequestParam;
 
 /**
@@ -23,10 +20,18 @@ public class BBController extends AbstractController {
         @OnOpen
         @Override
         public void open(Session session) {
+                try {
+                        for (String s : MongoPool.findIndex()) {
+                                session.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_AD, s));
+                        }
 
+                        session.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_DAILYMAIN, MongoPool.findMain()));
+                } catch (IOException e) {
+                        e.printStackTrace();
+                }
         }
 
-        @OnMessage
+        /*@OnMessage
         @Override
         public void message(String message, Session session) {
                 JSONObject object = JSONObject.parseObject(message);
@@ -60,5 +65,5 @@ public class BBController extends AbstractController {
 
                         MongoPool.insertPaper(paper);
                 }
-        }
+        }*/
 }

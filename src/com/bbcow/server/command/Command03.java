@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.websocket.Session;
 
+import com.alibaba.fastjson.JSONObject;
 import com.bbcow.server.util.RequestParam;
 
 /**
@@ -14,8 +15,9 @@ public class Command03 implements ICommand {
 
         @Override
         public List<String> process(String message, Session session) {
+                JSONObject object = JSONObject.parseObject(message);
                 List<String> list = new LinkedList<String>();
-                list.add(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_CHAT, message));
+                list.add(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_CHAT, object.getString("chatMessage")));
                 return list;
         }
 
