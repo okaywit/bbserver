@@ -9,7 +9,7 @@ public class TimerControler {
         private static Timer t = new Timer();
 
         public static void init() {
-                //t.schedule(new MainTask(), 0, 24 * 60 * 60 * 1000);
+                t.schedule(new MainTask(), 0, 24 * 60 * 60 * 1000);
                 //t.schedule(new NewsTask(), 0, 60 * 60 * 1000);
         }
 

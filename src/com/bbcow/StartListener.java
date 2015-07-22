@@ -19,11 +19,11 @@ public class StartListener implements ServletContextListener {
                 MongoPool.init();
                 CowCache.init();
                 TimerControler.init();
-                /*try {
+                try {
                         Class.forName("com.bbcow.BusCache");
                 } catch (ClassNotFoundException e) {
                         e.printStackTrace();
-                }*/
+                }
         }
 
 }

@@ -20,6 +20,7 @@ import javax.websocket.server.ServerEndpoint;
 import com.bbcow.BusCache;
 import com.bbcow.ServerConfigurator;
 import com.bbcow.db.MongoPool;
+import com.bbcow.platform.BaiduPing;
 import com.bbcow.platform.HostCache;
 import com.bbcow.platform.MessageTask;
 import com.bbcow.server.po.ShareHost;
@@ -72,7 +73,7 @@ public class OpenController {
                 public void hostMessage(String message, Session hostSession) {
                         try {
                                 userSession.getBasicRemote().sendText(message);
-
+                                BaiduPing.ping();
                         } catch (IOException e) {
                                 e.printStackTrace();
                         }
@@ -87,8 +88,6 @@ public class OpenController {
                         }
                 }
         }
-
-        public static ThreadLocal<String> ts = new ThreadLocal<String>();
 
         /**
          * 用户发送消息

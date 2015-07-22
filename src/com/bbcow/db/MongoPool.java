@@ -286,7 +286,7 @@ public class MongoPool {
                         .add(BsonDocument
                                 .parse("{$group:{_id : \"$paper_id\",title:{$first:\"$title\"},content:{$first:\"$content\"},linkUrl:{$first:\"$linkUrl\"},imgUrl:{$first:\"$imgUrl\"},path:{$first:\"$path\"},hostName:{$first:\"$hostName\"},total: {$sum: 1} }}"));
 
-                bs.add(BsonDocument.parse("{$sort:{_id:-1}}"));
+                bs.add(BsonDocument.parse("{$sort:{total:-1}}"));
                 bs.add(BsonDocument.parse("{$limit:20}"));
                 AggregateIterable<Document> iterable = db.getCollection("paper_trend").aggregate(bs);
                 final List<String> jsons = new LinkedList<String>();
