@@ -1,6 +1,7 @@
 package com.bbcow.db;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,12 +9,14 @@ import java.util.List;
 import org.bson.BsonDocument;
 import org.bson.Document;
 
+import com.alibaba.fastjson.JSONObject;
 import com.bbcow.server.po.DailyMain;
 import com.bbcow.server.po.Paper;
 import com.bbcow.server.po.ShareHost;
 import com.bbcow.server.util.RequestParam;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
 
@@ -45,6 +48,7 @@ public class MongoPool {
                 top.forEach(new Block<Document>() {
                         @Override
                         public void apply(final Document document) {
+
                                 jsons.add(document.toJson());
                         }
                 });
@@ -260,15 +264,32 @@ public class MongoPool {
 
         }
 
-        public static void insertPaperTrend(long paperId, int type) {
-                db.getCollection("paper_trend").insertOne(new Document("paper_id", paperId).append("type", type).append("ip", "").append("createDate", new Date()));
+        public static void insertPaperTrend(JSONObject object) {
+                db.getCollection("paper_trend").insertOne(
+                        new Document("paper_id", object.getLongValue("id"))
+                                .append("type", object.getIntValue("type"))
+                                .append("ip", "")
+                                .append("title", object.getString("title"))
+                                .append("content", object.getString("content"))
+                                .append("linkUrl", object.getString("linkUrl"))
+                                .append("imgUrl", object.getString("imgUrl"))
+                                .append("path", object.getString("path"))
+                                .append("hostName", object.getString("hostName"))
+                                .append("createDate", new Date()));
 
         }
 
         public static List<String> findPaperTrend() {
-                FindIterable<Document> iterable = db.getCollection("paper_trend").find();
-                final List<String> jsons = new LinkedList<String>();
+                List<BsonDocument> bs = new ArrayList<BsonDocument>();
+                bs.add(BsonDocument.parse("{$match:{type : 1}}"));
+                bs
+                        .add(BsonDocument
+                                .parse("{$group:{_id : \"$paper_id\",title:{$first:\"$title\"},content:{$first:\"$content\"},linkUrl:{$first:\"$linkUrl\"},imgUrl:{$first:\"$imgUrl\"},path:{$first:\"$path\"},hostName:{$first:\"$hostName\"},total: {$sum: 1} }}"));
 
+                bs.add(BsonDocument.parse("{$sort:{_id:-1}}"));
+                bs.add(BsonDocument.parse("{$limit:20}"));
+                AggregateIterable<Document> iterable = db.getCollection("paper_trend").aggregate(bs);
+                final List<String> jsons = new LinkedList<String>();
                 iterable.forEach(new Block<Document>() {
                         @Override
                         public void apply(final Document document) {

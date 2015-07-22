@@ -24,18 +24,23 @@ public class IndexController {
         @OnOpen
         public void open(Session userSession) {
                 HostCache.userMap.put(userSession.getId(), userSession);
+                long t1 = System.currentTimeMillis();
 
                 try {
                         for (String s : MongoPool.findHost()) {
                                 userSession.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_SHAREHOST, s));
                         }
+                        for (String s : MongoPool.findPaperTrend()) {
+                                userSession.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_AD, s));
+                        }
                         for (Iterator<String> it = HostCache.queue.iterator(); it.hasNext();) {
-                                userSession.getBasicRemote().sendText(it.next());
+                                userSession.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_PUSH, it.next()));
                         }
                 } catch (IOException e) {
                         e.printStackTrace();
                 }
 
+                System.out.println(System.currentTimeMillis() - t1);
         }
 
         @OnMessage

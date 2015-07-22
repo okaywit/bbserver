@@ -73,11 +73,6 @@ public class OpenController {
                         try {
                                 userSession.getBasicRemote().sendText(message);
 
-                                if (!HostCache.queue.contains(message)) {
-                                        if (!HostCache.queue.offer(message))
-                                                HostCache.queue.poll();
-                                }
-
                         } catch (IOException e) {
                                 e.printStackTrace();
                         }
@@ -93,16 +88,18 @@ public class OpenController {
                 }
         }
 
+        public static ThreadLocal<String> ts = new ThreadLocal<String>();
+
         /**
          * 用户发送消息
          */
         @OnMessage
-        public void userMessage(String message, Session userSession) {
+        public void userMessage(@PathParam(value = "path") String path, String message, Session userSession) {
                 try {
-
                         hostSession.getBasicRemote().sendText(message);
 
-                        BusCache.threads.execute(new MessageTask(message));
+                        MessageTask mt = new MessageTask(message, path);
+                        BusCache.threads.execute(mt);
 
                 } catch (IOException e) {
                         e.printStackTrace();
@@ -112,7 +109,6 @@ public class OpenController {
 
         @OnClose
         public void userQuit(@PathParam(value = "path") String path, Session userSession) {
-                System.out.println("-----1");
                 List<Session> ss = HostCache.hostUserMap.get(path);
                 int index = 0;
                 for (Session s : ss) {

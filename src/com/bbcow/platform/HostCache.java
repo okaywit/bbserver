@@ -28,7 +28,7 @@ public class HostCache {
         private static WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 
         //随机访问
-        public static Queue<String> queue = new LinkedBlockingQueue<String>(50);
+        public static Queue<String> queue = new LinkedBlockingQueue<String>(5);
 
         //TODO 主机未启动处理
         public static void init() {

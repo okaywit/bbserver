@@ -22,7 +22,6 @@ public class Command02 implements ICommand {
                         MongoPool.doLike(id);
                 if (type == 0)
                         MongoPool.doNotLike(id);
-                MongoPool.insertPaperTrend(id, type);
                 return null;
         }
 
