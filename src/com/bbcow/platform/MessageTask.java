@@ -6,9 +6,10 @@ import java.util.Iterator;
 import javax.websocket.Session;
 
 import com.alibaba.fastjson.JSONObject;
+import com.bbcow.BusCache;
+import com.bbcow.RequestParam;
 import com.bbcow.db.MongoPool;
 import com.bbcow.server.po.ShareHost;
-import com.bbcow.server.util.RequestParam;
 
 public class MessageTask implements Runnable {
         private String message;
@@ -23,25 +24,25 @@ public class MessageTask implements Runnable {
         public void run() {
                 JSONObject object = JSONObject.parseObject(message);
                 int mode = object.getIntValue("mode");
-                if (mode == 1) {
+                if (mode == BusCache.MESSAGE_MODE_AD) {
 
-                        if (!HostCache.queue.offer(message)) {
-                                HostCache.queue.poll();
-                                HostCache.queue.offer(message);
+                        if (!PlatformCache.queue.offer(message)) {
+                                PlatformCache.queue.poll();
+                                PlatformCache.queue.offer(message);
                         }
-                        for (Iterator<Session> it = HostCache.userMap.values().iterator(); it.hasNext();) {
+                        for (Iterator<Session> it = PlatformCache.userMap.values().iterator(); it.hasNext();) {
                                 Session session = it.next();
 
                                 try {
 
-                                        session.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_PUSH, this.message));
+                                        session.getBasicRemote().sendText(RequestParam.returnJson(BusCache.MESSAGE_TYPE_PUSH, this.message));
                                 } catch (IOException e) {
                                         e.printStackTrace();
                                 }
                         }
                         return;
                 }
-                if (mode == 2) {
+                if (mode == BusCache.MESSAGE_MODE_VOTE) {
                         ShareHost host = MongoPool.findOneHost(this.path);
                         object = object.getJSONObject("paperTrend");
                         object.put("path", this.path);

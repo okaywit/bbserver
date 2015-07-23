@@ -1,6 +1,5 @@
 package com.bbcow.platform.controller;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 import javax.websocket.OnClose;
@@ -9,10 +8,13 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
+import org.apache.log4j.Logger;
+
+import com.bbcow.BusCache;
+import com.bbcow.RequestParam;
 import com.bbcow.ServerConfigurator;
 import com.bbcow.db.MongoPool;
-import com.bbcow.platform.HostCache;
-import com.bbcow.server.util.RequestParam;
+import com.bbcow.platform.PlatformCache;
 
 /**
  * 初始化
@@ -21,35 +23,33 @@ import com.bbcow.server.util.RequestParam;
  */
 @ServerEndpoint(value = "/index", configurator = ServerConfigurator.class)
 public class IndexController {
+        private static Logger log = Logger.getLogger(IndexController.class);
+
         @OnOpen
         public void open(Session userSession) {
-                HostCache.userMap.put(userSession.getId(), userSession);
+                PlatformCache.userMap.put(userSession.getId(), userSession);
                 long t1 = System.currentTimeMillis();
 
-                try {
-                        for (String s : MongoPool.findHost()) {
-                                userSession.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_SHAREHOST, s));
-                        }
-                        for (String s : MongoPool.findPaperTrend()) {
-                                userSession.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_AD, s));
-                        }
-                        for (Iterator<String> it = HostCache.queue.iterator(); it.hasNext();) {
-                                userSession.getBasicRemote().sendText(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_PUSH, it.next()));
-                        }
-                } catch (IOException e) {
-                        e.printStackTrace();
+                for (String s : MongoPool.findHost()) {
+                        RequestParam.sendText(BusCache.MESSAGE_TYPE_SHAREHOST, s, userSession);
+                }
+                for (String s : MongoPool.findPaperTrend()) {
+                        RequestParam.sendText(BusCache.MESSAGE_TYPE_AD, s, userSession);
+                }
+                for (Iterator<String> it = PlatformCache.queue.iterator(); it.hasNext();) {
+                        RequestParam.sendText(BusCache.MESSAGE_TYPE_PUSH, it.next(), userSession);
                 }
 
-                System.out.println(System.currentTimeMillis() - t1);
+                log.error("Loading index.html used " + (+System.currentTimeMillis() - t1) + " millions");
         }
 
         @OnMessage
-        public void hostMessage(String message, Session session) {
+        public void indexMessage(String message, Session session) {
 
         }
 
         @OnClose
-        public void userQuit(Session userSession) {
-                HostCache.userMap.remove(userSession.getId());
+        public void indexQuit(Session session) {
+                PlatformCache.userMap.remove(session.getId());
         }
 }

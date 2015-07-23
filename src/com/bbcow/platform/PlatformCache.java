@@ -7,7 +7,7 @@ import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.websocket.Session;
-public class HostCache {
+public class PlatformCache {
         //首页用户
         public static Map<String, Session> userMap = new HashMap<String, Session>();
         //各主机用户

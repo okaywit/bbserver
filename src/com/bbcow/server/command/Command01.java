@@ -6,9 +6,10 @@ import java.util.List;
 import javax.websocket.Session;
 
 import com.alibaba.fastjson.JSONObject;
+import com.bbcow.BusCache;
+import com.bbcow.RequestParam;
 import com.bbcow.db.MongoPool;
 import com.bbcow.server.po.Paper;
-import com.bbcow.server.util.RequestParam;
 
 /**
  * @author 大辉Face
@@ -34,7 +35,7 @@ public class Command01 implements ICommand {
                 MongoPool.insertPaper(paper);
 
                 List<String> list = new LinkedList<String>();
-                list.add(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_AD, JSONObject.toJSONString(paper)));
+                list.add(RequestParam.returnJson(BusCache.MESSAGE_TYPE_AD, JSONObject.toJSONString(paper)));
                 return list;
 
         }

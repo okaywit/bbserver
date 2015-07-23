@@ -8,8 +8,6 @@ import com.bbcow.server.command.Command02;
 import com.bbcow.server.command.Command03;
 import com.bbcow.server.command.Command04;
 import com.bbcow.server.command.Command05;
-import com.bbcow.server.command.Command06;
-import com.bbcow.server.command.Command07;
 import com.bbcow.server.command.ICommand;
 
 /**
@@ -29,8 +27,6 @@ public class CowCache {
                 commandMap.put(3, new Command03());
                 commandMap.put(4, new Command04());
                 commandMap.put(5, new Command05());
-                commandMap.put(6, new Command06());
-                commandMap.put(7, new Command07());
 
         }
 

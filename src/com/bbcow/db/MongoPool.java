@@ -10,10 +10,11 @@ import org.bson.BsonDocument;
 import org.bson.Document;
 
 import com.alibaba.fastjson.JSONObject;
+import com.bbcow.BusCache;
+import com.bbcow.RequestParam;
 import com.bbcow.server.po.DailyMain;
 import com.bbcow.server.po.Paper;
 import com.bbcow.server.po.ShareHost;
-import com.bbcow.server.util.RequestParam;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.client.AggregateIterable;
@@ -166,7 +167,7 @@ public class MongoPool {
                 top.forEach(new Block<Document>() {
                         @Override
                         public void apply(final Document document) {
-                                jsons.add(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_TOP100, document.toJson()));
+                                jsons.add(RequestParam.returnJson(BusCache.MESSAGE_TYPE_TOP100, document.toJson()));
                         }
                 });
                 return jsons;
@@ -194,7 +195,7 @@ public class MongoPool {
                 top.forEach(new Block<Document>() {
                         @Override
                         public void apply(final Document document) {
-                                jsons.add(RequestParam.returnJson(RequestParam.MESSAGE_TYPE_YESTERDAY, document.toJson()));
+                                jsons.add(RequestParam.returnJson(BusCache.MESSAGE_TYPE_YESTERDAY, document.toJson()));
                         }
                 });
                 return jsons;

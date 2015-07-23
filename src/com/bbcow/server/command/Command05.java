@@ -6,8 +6,8 @@ import java.util.List;
 import javax.websocket.Session;
 
 import com.alibaba.fastjson.JSONObject;
+import com.bbcow.BusCache;
 import com.bbcow.db.MongoPool;
-import com.bbcow.server.util.RequestParam;
 
 /**
  * 筛选
@@ -21,10 +21,10 @@ public class Command05 implements ICommand {
                 List<String> list = new LinkedList<String>();
                 JSONObject object = JSONObject.parseObject(message);
                 int conditionType = object.getIntValue("conditionType");
-                if (conditionType == RequestParam.MESSAGE_TYPE_YESTERDAY) {
+                if (conditionType == BusCache.MESSAGE_TYPE_YESTERDAY) {
                         list.addAll(MongoPool.findYesterday());
                 }
-                if (conditionType == RequestParam.MESSAGE_TYPE_TOP100) {
+                if (conditionType == BusCache.MESSAGE_TYPE_TOP100) {
                         list.addAll(MongoPool.findTop100());
                 }
 

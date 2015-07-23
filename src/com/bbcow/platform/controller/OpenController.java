@@ -21,7 +21,8 @@ import com.bbcow.BusCache;
 import com.bbcow.ServerConfigurator;
 import com.bbcow.db.MongoPool;
 import com.bbcow.platform.BaiduPing;
-import com.bbcow.platform.HostCache;
+import com.bbcow.platform.FirstFilter;
+import com.bbcow.platform.PlatformCache;
 import com.bbcow.platform.MessageTask;
 import com.bbcow.server.po.ShareHost;
 
@@ -42,9 +43,9 @@ public class OpenController {
         @OnOpen
         public void userConnect(@PathParam(value = "path") String path, Session userSession) {
                 this.userSession = userSession;
-                List<Session> ss = HostCache.hostUserMap.get(path);
+                List<Session> ss = PlatformCache.hostUserMap.get(path);
                 if (ss == null) {
-                        HostCache.hostUserMap.put(path, ss = new LinkedList<Session>());
+                        PlatformCache.hostUserMap.put(path, ss = new LinkedList<Session>());
                 }
                 ss.add(userSession);
 
@@ -95,6 +96,7 @@ public class OpenController {
         @OnMessage
         public void userMessage(@PathParam(value = "path") String path, String message, Session userSession) {
                 try {
+                        message = FirstFilter.filter(message);
                         hostSession.getBasicRemote().sendText(message);
 
                         MessageTask mt = new MessageTask(message, path);
@@ -108,7 +110,7 @@ public class OpenController {
 
         @OnClose
         public void userQuit(@PathParam(value = "path") String path, Session userSession) {
-                List<Session> ss = HostCache.hostUserMap.get(path);
+                List<Session> ss = PlatformCache.hostUserMap.get(path);
                 int index = 0;
                 for (Session s : ss) {
                         if (s.getId().equals(userSession.getId())) {
