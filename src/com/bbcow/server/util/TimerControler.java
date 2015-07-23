@@ -1,16 +1,18 @@
 package com.bbcow.server.util;
 
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import com.bbcow.db.MongoPool;
+import com.bbcow.platform.BaiduPing;
 
 public class TimerControler {
         private static Timer t = new Timer();
 
         public static void init() {
-                t.schedule(new MainTask(), 0, 24 * 60 * 60 * 1000);
-                //t.schedule(new NewsTask(), 0, 60 * 60 * 1000);
+                t.schedule(new MainTask(), 0, 12 * 60 * 60 * 1000);
+                t.schedule(new BaiduTask(), 0, 60 * 60 * 1000);
         }
 
         static class MainTask extends TimerTask {
@@ -22,12 +24,15 @@ public class TimerControler {
 
         }
 
-        static class NewsTask extends TimerTask {
+        static class BaiduTask extends TimerTask {
 
                 @Override
                 public void run() {
-
-                        MongoPool.insertGoogleNews(HtmlParser.getNews());
+                		try {
+							BaiduPing.site();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
                 }
 
         }
