@@ -69,7 +69,7 @@ public class FirstFilter {
                 //.replaceAll(",", "，").replaceAll(":", "：") 待定
                 String filterMessage = s.toString().replaceAll("\"", "”").replaceAll("\n", "").replaceAll("\\[1\\]", "\"").replaceAll("\\[2\\]", ":").replaceAll("\\[3\\]", ",");
                 filterMessage = filterMessage.replaceAll("@@1@@", "[1]").replaceAll("@@2@@", "[2]").replaceAll("@@3@@", "[3]");
-                System.out.println(filterMessage);
+
                 log.error("Decode message use " + (System.currentTimeMillis() - t1) + " mils");
                 return filterMessage;
         }
