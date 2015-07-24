@@ -5,7 +5,7 @@ import javax.servlet.ServletContextListener;
 
 import com.bbcow.db.MongoPool;
 import com.bbcow.server.CowCache;
-import com.bbcow.server.util.TimerControler;
+import com.bbcow.util.TimerControler;
 
 public class StartListener implements ServletContextListener {
 

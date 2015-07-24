@@ -20,11 +20,11 @@ import javax.websocket.server.ServerEndpoint;
 import com.bbcow.BusCache;
 import com.bbcow.ServerConfigurator;
 import com.bbcow.db.MongoPool;
-import com.bbcow.platform.BaiduPing;
 import com.bbcow.platform.FirstFilter;
 import com.bbcow.platform.PlatformCache;
 import com.bbcow.platform.MessageTask;
 import com.bbcow.server.po.ShareHost;
+import com.bbcow.util.BaiduPing;
 
 /**
  * 访问指定主机

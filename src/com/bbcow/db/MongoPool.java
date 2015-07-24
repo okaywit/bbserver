@@ -11,10 +11,10 @@ import org.bson.Document;
 
 import com.alibaba.fastjson.JSONObject;
 import com.bbcow.BusCache;
-import com.bbcow.RequestParam;
 import com.bbcow.server.po.DailyMain;
 import com.bbcow.server.po.Paper;
 import com.bbcow.server.po.ShareHost;
+import com.bbcow.util.RequestParam;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.client.AggregateIterable;

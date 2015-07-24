@@ -1,11 +1,10 @@
-package com.bbcow.server.util;
+package com.bbcow.util;
 
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import com.bbcow.db.MongoPool;
-import com.bbcow.platform.BaiduPing;
 
 public class TimerControler {
         private static Timer t = new Timer();
@@ -28,11 +27,11 @@ public class TimerControler {
 
                 @Override
                 public void run() {
-                		try {
-							BaiduPing.site();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+                        try {
+                                BaiduPing.site();
+                        } catch (IOException e) {
+                                e.printStackTrace();
+                        }
                 }
 
         }

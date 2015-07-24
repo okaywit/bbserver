@@ -7,10 +7,10 @@ import javax.websocket.server.ServerEndpoint;
 
 import com.alibaba.fastjson.JSONObject;
 import com.bbcow.BusCache;
-import com.bbcow.RequestParam;
 import com.bbcow.ServerConfigurator;
 import com.bbcow.db.MongoPool;
 import com.bbcow.server.po.ShareHost;
+import com.bbcow.util.RequestParam;
 
 /**
  * 分享

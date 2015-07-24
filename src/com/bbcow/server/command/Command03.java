@@ -7,7 +7,7 @@ import javax.websocket.Session;
 
 import com.alibaba.fastjson.JSONObject;
 import com.bbcow.BusCache;
-import com.bbcow.RequestParam;
+import com.bbcow.util.RequestParam;
 
 /**
  * @author 大辉Face

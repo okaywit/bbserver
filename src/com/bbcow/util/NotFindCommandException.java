@@ -1,4 +1,4 @@
-package com.bbcow.server.util;
+package com.bbcow.util;
 
 import org.apache.log4j.Logger;
 

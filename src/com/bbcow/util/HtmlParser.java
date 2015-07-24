@@ -1,4 +1,4 @@
-package com.bbcow.server.util;
+package com.bbcow.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class HtmlParser {
 
                 HttpClient client = new DefaultHttpClient();
                 try {
-                        HttpResponse response = client.execute(new HttpGet("http://news.google.com/nwshp?hl=zh-CN&tab=wn"));
+                        HttpResponse response = client.execute(new HttpGet("http://imgur.com/"));
                         HttpEntity entity = response.getEntity();
 
                         is = entity.getContent();
@@ -32,6 +32,7 @@ public class HtmlParser {
 
                         while ((con = br.readLine()) != null) {
                                 allcon.append(con);
+                                System.out.println(con);
                         }
 
                 } catch (IOException e) {
@@ -45,6 +46,10 @@ public class HtmlParser {
                         }
                 }
                 return allcon.toString();
+        }
+
+        public static void main(String[] args) {
+                HtmlParser.getNews();
         }
 
         public static DailyMain getWikiMain() {

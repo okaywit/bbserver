@@ -5,9 +5,9 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
 import com.bbcow.BusCache;
-import com.bbcow.RequestParam;
 import com.bbcow.ServerConfigurator;
 import com.bbcow.db.MongoPool;
+import com.bbcow.util.RequestParam;
 
 /**
  * 消息

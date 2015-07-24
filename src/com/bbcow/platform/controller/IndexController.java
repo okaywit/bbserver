@@ -11,10 +11,10 @@ import javax.websocket.server.ServerEndpoint;
 import org.apache.log4j.Logger;
 
 import com.bbcow.BusCache;
-import com.bbcow.RequestParam;
 import com.bbcow.ServerConfigurator;
 import com.bbcow.db.MongoPool;
 import com.bbcow.platform.PlatformCache;
+import com.bbcow.util.RequestParam;
 
 /**
  * 初始化

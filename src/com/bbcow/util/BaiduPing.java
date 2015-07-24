@@ -1,4 +1,4 @@
-package com.bbcow.platform;
+package com.bbcow.util;
 
 import java.io.IOException;
 
@@ -9,23 +9,23 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 public class BaiduPing {
-	
-		public static void site() throws IOException{
-			
-				// 定义HttpClient
-				HttpClient client = new DefaultHttpClient();
-	
-				// 实例化HTTP方法
-				HttpPost request = new HttpPost("http://data.zz.baidu.com/urls?site=www.grownbook.com&token=hqjEuHTIHexJiPFt");
-	
-				// 创建UrlEncodedFormEntity对象
-				StringEntity formEntiry = new StringEntity("http://www.grownbook.com/index.html \n http://www.grownbook.com/share.html");
-				request.setEntity(formEntiry);
-	
-				// 执行请求
-				client.execute(request);
-	
-		}
+
+        public static void site() throws IOException {
+
+                // 定义HttpClient
+                HttpClient client = new DefaultHttpClient();
+
+                // 实例化HTTP方法
+                HttpPost request = new HttpPost("http://data.zz.baidu.com/urls?site=www.grownbook.com&token=hqjEuHTIHexJiPFt");
+
+                // 创建UrlEncodedFormEntity对象
+                StringEntity formEntiry = new StringEntity("http://www.grownbook.com/index.html \n http://www.grownbook.com/share.html");
+                request.setEntity(formEntiry);
+
+                // 执行请求
+                client.execute(request);
+
+        }
 
         public static void ping() {
                 HttpClient client = new DefaultHttpClient();
@@ -44,7 +44,7 @@ public class BaiduPing {
                                 .append("<value><string>http://www.grownbook.com/</string></value>")
                                 .append("</param>")
                                 .append("<param>")
-                                .append("<value><string>http://www.grownbook.com/</string></value>")
+                                .append("<value><string>http://www.grownbook.com/index.html</string></value>")
                                 .append("</param>")
                                 .append("<param>")
                                 .append("<value><string>http://www.grownbook.com/rss</string></value>")
