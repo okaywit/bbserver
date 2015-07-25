@@ -19,6 +19,7 @@ public class BusCache {
         //客户端请求
         public final static int MESSAGE_MODE_AD = 1;//消息
         public final static int MESSAGE_MODE_VOTE = 2;//投票
+        public final static int MESSAGE_MODE_CHAT = 3;//聊天
         public final static int MESSAGE_MODE_SEARCH = 5;//查询
 
         static {

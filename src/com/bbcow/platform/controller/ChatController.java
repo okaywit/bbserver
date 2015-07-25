@@ -9,6 +9,7 @@ import javax.websocket.server.ServerEndpoint;
 import com.alibaba.fastjson.JSONObject;
 import com.bbcow.ServerConfigurator;
 import com.bbcow.api.TuLing;
+import com.bbcow.platform.FirstFilter;
 import com.bbcow.platform.PlatformCache;
 import com.bbcow.util.RequestParam;
 
@@ -26,6 +27,7 @@ public class ChatController {
 
         @OnMessage
         public void chatMessage(String message, Session session) {
+                message = FirstFilter.filter(message);
                 JSONObject object = JSONObject.parseObject(message);
 
                 String msg = object.getString("msg");

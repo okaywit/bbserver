@@ -54,9 +54,16 @@ public class FirstFilter {
                                 .append("[1][3][1]imgUrl[1][2][1]")
                                 .append(message.substring(message.indexOf("\"imgUrl\"") + 10, message.indexOf("\"linkUrl\"") - 2))
                                 .append("[1][3][1]linkUrl[1][2][1]")
-                                .append(message.substring(message.indexOf("\"linkUrl\"") + 11, message.indexOf("}}") - 1));
-
-                        s.append("[1]}");
+                                .append(message.substring(message.indexOf("\"linkUrl\"") + 11, message.indexOf("}}") - 1))
+                                .append("[1]}");
+                        break;
+                case BusCache.MESSAGE_MODE_CHAT:
+                        s
+                                .append("[3][1]fakeName[1][2][1]")
+                                .append(message.substring(message.indexOf("\"fakeName\"") + 12, message.indexOf("\"msg\"") - 2))
+                                .append("[1][3][1]msg[1][2][1]")
+                                .append(message.substring(message.indexOf("\"msg\"") + 7, message.indexOf("}") - 1))
+                                .append("[1]");
                         break;
                 case BusCache.MESSAGE_MODE_SEARCH:
                         s.append("[3][1]conditionType[1][2]").append(message.substring(message.indexOf("\"conditionType\"") + 16, message.indexOf("}")));
@@ -67,7 +74,7 @@ public class FirstFilter {
 
                 s.append("}");
                 //.replaceAll(",", "，").replaceAll(":", "：") 待定
-                String filterMessage = s.toString().replaceAll("\"", "”").replaceAll("\n", "").replaceAll("\\[1\\]", "\"").replaceAll("\\[2\\]", ":").replaceAll("\\[3\\]", ",");
+                String filterMessage = s.toString().replaceAll("\"", "”").replaceAll("[\n\\\\]", "*").replaceAll("\\[1\\]", "\"").replaceAll("\\[2\\]", ":").replaceAll("\\[3\\]", ",");
                 filterMessage = filterMessage.replaceAll("@@1@@", "[1]").replaceAll("@@2@@", "[2]").replaceAll("@@3@@", "[3]");
 
                 log.error("Decode message use " + (System.currentTimeMillis() - t1) + " mils");
