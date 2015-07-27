@@ -25,7 +25,7 @@ public class Command05 implements ICommand {
                         list.addAll(MongoPool.findYesterday());
                 }
                 if (conditionType == BusCache.MESSAGE_TYPE_TOP100) {
-                        list.addAll(MongoPool.findTop100());
+                        list.addAll(MongoPool.findTop(100));
                 }
 
                 return list;

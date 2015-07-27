@@ -25,6 +25,7 @@ import org.apache.http.message.BasicNameValuePair;
 
 import com.alibaba.fastjson.JSONObject;
 import com.bbcow.ServerConfigurator;
+import com.bbcow.db.MongoPool;
 
 /**
  * 访问指定主机
@@ -83,6 +84,7 @@ public class LoginController {
 
                         while ((returnJson = reader.readLine()) != null) {
                                 session.getBasicRemote().sendText(returnJson);
+                                MongoPool.insertUser(JSONObject.parseObject(returnJson).getString("uid"), token);
                         }
 
                 } catch (Exception e) {

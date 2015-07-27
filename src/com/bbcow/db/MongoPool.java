@@ -37,22 +37,27 @@ public class MongoPool {
         }
 
         /**
-         * 获取热门信息+当天信息
+         * 获取当天信息
          */
         public static List<String> findIndex() {
-                FindIterable<Document> top = db.getCollection("paper").find().sort(BsonDocument.parse("{goodCount:-1}")).limit(2);
+                //FindIterable<Document> top = db.getCollection("paper").find().sort(BsonDocument.parse("{goodCount:-1}")).limit(2);
 
-                FindIterable<Document> current = db.getCollection("paper").find(BsonDocument.parse("{createDate:{$gte:ISODate('" + sFormat.format(new Date()) + "T00:00:00.000Z')}}"));
+                FindIterable<Document> current =
+                        db
+                                .getCollection("paper")
+                                .find(BsonDocument.parse("{createDate:{$gte:ISODate('" + sFormat.format(new Date()) + "T00:00:00.000Z')}}"))
+                                .sort(BsonDocument.parse("{createDate:-1}"))
+                                .limit(50);
 
                 final List<String> jsons = new LinkedList<String>();
 
-                top.forEach(new Block<Document>() {
+                /*top.forEach(new Block<Document>() {
                         @Override
                         public void apply(final Document document) {
 
                                 jsons.add(document.toJson());
                         }
-                });
+                });*/
 
                 current.forEach(new Block<Document>() {
 
@@ -160,8 +165,8 @@ public class MongoPool {
         /**
          * 获取前100
          */
-        public static List<String> findTop100() {
-                FindIterable<Document> top = db.getCollection("paper").find().sort(BsonDocument.parse("{goodCount:-1}")).limit(100);
+        public static List<String> findTop(int limitNum) {
+                FindIterable<Document> top = db.getCollection("paper").find().sort(BsonDocument.parse("{goodCount:-1}")).limit(limitNum);
                 final List<String> jsons = new LinkedList<String>();
 
                 top.forEach(new Block<Document>() {
@@ -211,6 +216,29 @@ public class MongoPool {
                 return document.toJson();
         }
 
+        public static void insertUser(String uid, String token) {
+                FindIterable<Document> iterable = db.getCollection("user").find(BsonDocument.parse("{\"uid\":\"" + uid + "\"}"));
+                if (iterable.first() != null) {
+                        db.getCollection("user").updateOne(BsonDocument.parse("{\"uid\":\"" + uid + "\"}"), BsonDocument.parse("{$set:{\"token\":\"" + token + "\"}}"));
+                } else {
+                        db.getCollection("user").insertOne(new Document("uid", uid).append("token", token));
+                }
+        }
+
+        public static List<String> findUser() {
+                FindIterable<Document> iterable = db.getCollection("user").find();
+
+                final List<String> tokens = new LinkedList<String>();
+
+                iterable.forEach(new Block<Document>() {
+                        @Override
+                        public void apply(final Document document) {
+                                tokens.add(document.toJson());
+                        }
+                });
+                return tokens;
+        }
+
         public static void insertHost(ShareHost host) {
                 db.getCollection("share_host").insertOne(
                         new Document("ip", host.getIp())
@@ -221,6 +249,10 @@ public class MongoPool {
                                 .append("path", host.getPath())
                                 .append("type", "0")
                                 .append("status", "0"));
+        }
+
+        public static void batchInsertPaper(List<Document> papers) {
+                db.getCollection("paper").insertMany(papers);
         }
 
         public static void insertPaper(Paper paper) {
@@ -280,6 +312,9 @@ public class MongoPool {
 
         }
 
+        /**
+         * 获取本站关注度最高+最新
+         */
         public static List<String> findPaperTrend() {
                 List<BsonDocument> bs = new ArrayList<BsonDocument>();
                 bs.add(BsonDocument.parse("{$match:{type : 1}}"));
@@ -288,10 +323,25 @@ public class MongoPool {
                                 .parse("{$group:{_id : \"$paper_id\",title:{$first:\"$title\"},content:{$first:\"$content\"},linkUrl:{$first:\"$linkUrl\"},imgUrl:{$first:\"$imgUrl\"},path:{$first:\"$path\"},hostName:{$first:\"$hostName\"},total: {$sum: 1} }}"));
 
                 bs.add(BsonDocument.parse("{$sort:{total:-1}}"));
-                bs.add(BsonDocument.parse("{$limit:20}"));
+                bs.add(BsonDocument.parse("{$limit:5}"));
                 AggregateIterable<Document> iterable = db.getCollection("paper_trend").aggregate(bs);
                 final List<String> jsons = new LinkedList<String>();
+
+                FindIterable<Document> current =
+                        db
+                                .getCollection("paper")
+                                .find(BsonDocument.parse("{createDate:{$gte:ISODate('" + sFormat.format(new Date()) + "T00:00:00.000Z')}}"))
+                                .sort(BsonDocument.parse("{createDate:-1}"))
+                                .limit(30);
+
                 iterable.forEach(new Block<Document>() {
+                        @Override
+                        public void apply(final Document document) {
+                                jsons.add(document.toJson());
+                        }
+                });
+
+                current.forEach(new Block<Document>() {
                         @Override
                         public void apply(final Document document) {
                                 jsons.add(document.toJson());

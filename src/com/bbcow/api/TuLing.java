@@ -37,7 +37,7 @@ public class TuLing {
         }
 
         public static void main(String[] args) {
-                System.out.println(TuLing.request("你好"));
+                System.out.println(TuLing.request("新闻"));
         }
 
 }
