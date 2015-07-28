@@ -21,6 +21,7 @@ import org.bson.Document;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.bbcow.BusCache;
 import com.bbcow.db.MongoPool;
 
 public class TimerControler {
@@ -28,8 +29,8 @@ public class TimerControler {
 
         public static void init() {
                 t.schedule(new MainTask(), 0, 12 * 60 * 60 * 1000);
-                //t.schedule(new BaiduTask(), 0, 60 * 60 * 1000);
-                t.schedule(new WeiboTask(), 0, 60 * 60 * 1000);
+                t.schedule(new BaiduTask(), 0, 6 * 60 * 60 * 1000);
+                t.schedule(new WeiboTask(), 0, 1 * 60 * 60 * 1000);
         }
 
         static class MainTask extends TimerTask {
@@ -46,7 +47,9 @@ public class TimerControler {
                 @Override
                 public void run() {
                         try {
-                                BaiduPing.site();
+                                String date = BusCache.sFormat.format(new Date());
+                                HtmlParser.staticHtml(date);
+                                BaiduPing.site(date);
                         } catch (IOException e) {
                                 e.printStackTrace();
                         }
@@ -91,14 +94,11 @@ public class TimerControler {
                                                 JSONObject s = (JSONObject) ss.get(i);
                                                 Date date = new Date(s.getString("created_at"));//创建时间（转发微博为转发时间）
                                                 //是否转发
-                                                boolean isRe = false;
-                                                if ((isRe = s.getString("retweeted_status") != null)) {
-                                                        s = s.getJSONObject("retweeted_status");
-                                                }
+                                                s = s.getString("retweeted_status") != null ? s.getJSONObject("retweeted_status") : s;
 
                                                 String content = s.getString("text");
 
-                                                if (date.getTime() > time || isRe) {
+                                                if (date.getTime() > time) {
                                                         Matcher matcher = p.matcher(content);
                                                         returnPaper.add(new Document("id", System.currentTimeMillis())
                                                                 .append("title", content.substring(0, 20))
@@ -106,7 +106,7 @@ public class TimerControler {
                                                                 .append("contactName", "新浪微博")
                                                                 .append("contactTel", uid)
                                                                 .append("tag", "")
-                                                                .append("imgUrl", s.getString("thumbnail_pic") == null ? "" : s.getString("thumbnail_pic"))
+                                                                .append("imgUrl", s.getString("original_pic") == null ? "" : s.getString("original_pic"))
                                                                 .append("linkUrl", matcher.find() ? matcher.group(0) : "")
                                                                 .append("createDate", date)
                                                                 .append("goodCount", s.getLongValue("comments_count"))

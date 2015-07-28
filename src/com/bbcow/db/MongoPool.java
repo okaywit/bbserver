@@ -1,6 +1,5 @@
 package com.bbcow.db;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -27,7 +26,6 @@ import com.mongodb.client.MongoDatabase;
  * @author 大辉Face
  */
 public class MongoPool {
-        private static SimpleDateFormat sFormat = new SimpleDateFormat("yyyy-MM-dd");
         private static MongoClient mongoClient;
         private static MongoDatabase db;
 
@@ -42,12 +40,8 @@ public class MongoPool {
         public static List<String> findIndex() {
                 //FindIterable<Document> top = db.getCollection("paper").find().sort(BsonDocument.parse("{goodCount:-1}")).limit(2);
 
-                FindIterable<Document> current =
-                        db
-                                .getCollection("paper")
-                                .find(BsonDocument.parse("{createDate:{$gte:ISODate('" + sFormat.format(new Date()) + "T00:00:00.000Z')}}"))
-                                .sort(BsonDocument.parse("{createDate:-1}"))
-                                .limit(50);
+                //.find(BsonDocument.parse("{createDate:{$gte:ISODate('" + sFormat.format(new Date()) + "T00:00:00.000Z')}}"))
+                FindIterable<Document> current = db.getCollection("paper").find().sort(BsonDocument.parse("{createDate:-1}")).limit(50);
 
                 final List<String> jsons = new LinkedList<String>();
 
@@ -152,7 +146,7 @@ public class MongoPool {
                 FindIterable<Document> current =
                         db
                                 .getCollection("paper")
-                                .find(BsonDocument.parse("{createDate:{$gte:ISODate('" + sFormat.format(new Date()) + "T00:00:00.000Z')}}"))
+                                .find(BsonDocument.parse("{createDate:{$gte:ISODate('" + BusCache.sFormat.format(new Date()) + "T00:00:00.000Z')}}"))
                                 .sort(BsonDocument.parse("{goodCount:-1}"))
                                 .limit(1);
                 if (current.first() != null) {
@@ -160,6 +154,27 @@ public class MongoPool {
                 } else {
                         return null;
                 }
+        }
+
+        /**
+         * 获取当天头条
+         */
+        public static List<String> findDailyTOP5() {
+                FindIterable<Document> current =
+                        db
+                                .getCollection("paper")
+                                .find(BsonDocument.parse("{createDate:{$gte:ISODate('" + BusCache.sFormat.format(new Date()) + "T00:00:00.000Z')}}"))
+                                .sort(BsonDocument.parse("{goodCount:-1}"))
+                                .limit(5);
+                final List<String> jsons = new LinkedList<String>();
+
+                current.forEach(new Block<Document>() {
+                        @Override
+                        public void apply(final Document document) {
+                                jsons.add(RequestParam.returnJson(BusCache.MESSAGE_TYPE_TOP100, document.toJson()));
+                        }
+                });
+                return jsons;
         }
 
         /**
@@ -190,9 +205,9 @@ public class MongoPool {
                                 .getCollection("paper")
                                 .find(
                                         BsonDocument.parse("{$and : [{createDate:{$gte:ISODate('"
-                                                + sFormat.format(yesterday)
+                                                + BusCache.sFormat.format(yesterday)
                                                 + "T00:00:00.000Z')}},{createDate:{$lt:ISODate('"
-                                                + sFormat.format(new Date())
+                                                + BusCache.sFormat.format(new Date())
                                                 + "T00:00:00.000Z')}}] }"))
                                 .limit(100);
                 final List<String> jsons = new LinkedList<String>();
@@ -313,26 +328,21 @@ public class MongoPool {
         }
 
         /**
-         * 获取本站关注度最高+最新
+         * 获取本站当日关注度最高+最新
          */
         public static List<String> findPaperTrend() {
                 List<BsonDocument> bs = new ArrayList<BsonDocument>();
-                bs.add(BsonDocument.parse("{$match:{type : 1}}"));
+                bs.add(BsonDocument.parse("{$match:{type : 1,createDate:{$gte:ISODate('" + BusCache.sFormat.format(new Date()) + "T00:00:00.000Z')}}}"));
                 bs
                         .add(BsonDocument
                                 .parse("{$group:{_id : \"$paper_id\",title:{$first:\"$title\"},content:{$first:\"$content\"},linkUrl:{$first:\"$linkUrl\"},imgUrl:{$first:\"$imgUrl\"},path:{$first:\"$path\"},hostName:{$first:\"$hostName\"},total: {$sum: 1} }}"));
 
                 bs.add(BsonDocument.parse("{$sort:{total:-1}}"));
-                bs.add(BsonDocument.parse("{$limit:5}"));
+                bs.add(BsonDocument.parse("{$limit:10}"));
                 AggregateIterable<Document> iterable = db.getCollection("paper_trend").aggregate(bs);
                 final List<String> jsons = new LinkedList<String>();
-
-                FindIterable<Document> current =
-                        db
-                                .getCollection("paper")
-                                .find(BsonDocument.parse("{createDate:{$gte:ISODate('" + sFormat.format(new Date()) + "T00:00:00.000Z')}}"))
-                                .sort(BsonDocument.parse("{createDate:-1}"))
-                                .limit(30);
+                //BsonDocument.parse("{createDate:{$gte:ISODate('" + sFormat.format(new Date()) + "T00:00:00.000Z')}}")
+                FindIterable<Document> current = db.getCollection("paper").find().sort(BsonDocument.parse("{createDate:-1}")).limit(30);
 
                 iterable.forEach(new Block<Document>() {
                         @Override

@@ -1,9 +1,12 @@
 package com.bbcow;
 
+import java.text.SimpleDateFormat;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class BusCache {
+        public static SimpleDateFormat sFormat = new SimpleDateFormat("yyyy-MM-dd");
+
         public static ExecutorService threads = null;
         //服务器返回
         public final static int MESSAGE_TYPE_ERROR = 0; //错误信息类型

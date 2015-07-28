@@ -44,10 +44,10 @@ public class LoginController {
                 try {
                         HttpPost post = new HttpPost("https://api.weibo.com/oauth2/access_token");
                         List<NameValuePair> params = new LinkedList<NameValuePair>();
-                        params.add(new BasicNameValuePair("client_id", "4284001649"));
-                        params.add(new BasicNameValuePair("client_secret", "a9c723ea405d32eb9adcc525c624e8e0"));
+                        params.add(new BasicNameValuePair("client_id", "1111293984"));
+                        params.add(new BasicNameValuePair("client_secret", "f86a6089e68bba65e38cfbc3cee257ef"));
                         params.add(new BasicNameValuePair("grant_type", "authorization_code"));
-                        params.add(new BasicNameValuePair("redirect_uri", "http://www.grownbook.com/login.html"));
+                        params.add(new BasicNameValuePair("redirect_uri", "http://www.bbcow.com/login.html"));
                         params.add(new BasicNameValuePair("code", code));
                         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
 

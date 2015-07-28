@@ -21,10 +21,9 @@ import com.bbcow.BusCache;
 import com.bbcow.ServerConfigurator;
 import com.bbcow.db.MongoPool;
 import com.bbcow.platform.FirstFilter;
-import com.bbcow.platform.PlatformCache;
 import com.bbcow.platform.MessageTask;
+import com.bbcow.platform.PlatformCache;
 import com.bbcow.server.po.ShareHost;
-import com.bbcow.util.BaiduPing;
 
 /**
  * 访问指定主机
@@ -74,7 +73,6 @@ public class OpenController {
                 public void hostMessage(String message, Session hostSession) {
                         try {
                                 userSession.getBasicRemote().sendText(message);
-                                BaiduPing.ping();
                         } catch (IOException e) {
                                 e.printStackTrace();
                         }
