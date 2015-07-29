@@ -163,7 +163,7 @@ public class MongoPool {
                 FindIterable<Document> current =
                         db
                                 .getCollection("paper")
-                                .find(BsonDocument.parse("{createDate:{$gte:ISODate('" + BusCache.sFormat.format(new Date()) + "T00:00:00.000Z')}}"))
+                                .find(BsonDocument.parse("{createDate:{$gte:ISODate(\""+BusCache.sFormat.format(new Date())+"T00:00:00.00Z\")}}"))
                                 .sort(BsonDocument.parse("{goodCount:-1}"))
                                 .limit(5);
                 final List<String> jsons = new LinkedList<String>();
