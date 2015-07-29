@@ -24,6 +24,19 @@ public class BaiduPing {
 
         }
 
+        public static void site() throws IOException {
+                // 定义HttpClient
+                HttpClient client = new DefaultHttpClient();
+                // 实例化HTTP方法
+                HttpPost request = new HttpPost("http://data.zz.baidu.com/urls?site=www.bbcow.com&token=hqjEuHTIHexJiPFt");
+                // 创建UrlEncodedFormEntity对象
+                StringEntity formEntiry = new StringEntity("http://www.bbcow.com/index.html");
+                request.setEntity(formEntiry);
+                // 执行请求
+                client.execute(request);
+
+        }
+
         public static void main(String[] args) {
                 BaiduPing.ping();
         }

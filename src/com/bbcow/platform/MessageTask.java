@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.bbcow.BusCache;
 import com.bbcow.db.MongoPool;
 import com.bbcow.server.po.ShareHost;
+import com.bbcow.util.HtmlParser;
 import com.bbcow.util.RequestParam;
 
 public class MessageTask implements Runnable {
@@ -40,6 +41,8 @@ public class MessageTask implements Runnable {
                                         e.printStackTrace();
                                 }
                         }
+                        //新文章更新首页
+                        HtmlParser.staticIndex();
                         return;
                 }
                 if (mode == BusCache.MESSAGE_MODE_VOTE) {
@@ -48,6 +51,8 @@ public class MessageTask implements Runnable {
                         object.put("path", this.path);
                         object.put("hostName", host.getName());
                         MongoPool.insertPaperTrend(object);
+                        //投票更新首页
+                        HtmlParser.staticIndex();
                         return;
                 }
 

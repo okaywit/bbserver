@@ -68,7 +68,7 @@ public class MongoPool {
          * 获取分享主机
          */
         public static List<String> findHost() {
-                FindIterable<Document> top = db.getCollection("share_host").find();
+                FindIterable<Document> top = db.getCollection("share_host").find(BsonDocument.parse("{status:{$eq:\"1\"}}"));
                 final List<String> jsons = new LinkedList<String>();
 
                 top.forEach(new Block<Document>() {

@@ -125,8 +125,11 @@ public class TimerControler {
                                                 e.printStackTrace();
                                         }
                                 }
-                                if (returnPaper.size() > 0)
+                                if (returnPaper.size() > 0) {
                                         MongoPool.batchInsertPaper(returnPaper);
+                                        //新文章更新首页
+                                        HtmlParser.staticIndex();
+                                }
                         } catch (IOException e) {
                                 e.printStackTrace();
                         }

@@ -11,7 +11,6 @@ public class ServerConfigurator extends ServerEndpointConfig.Configurator {
 
         @Override
         public boolean checkOrigin(String originHeaderValue) {
-
                 return super.checkOrigin(originHeaderValue);
         }
 

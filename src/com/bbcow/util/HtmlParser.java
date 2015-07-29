@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -24,7 +25,116 @@ import com.bbcow.server.po.DailyMain;
 
 public class HtmlParser {
         private static Logger log = Logger.getLogger(HtmlParser.class);
-/**静态页面生成*/
+
+        //private static final String PATH = "D://html/bbhtml/";
+
+        private static final String PATH = "/usr/share/nginx/html/";
+
+        /**
+         * 静态首页生成
+         * 1.发表信息 2.投票
+         */
+        public static void staticIndex() {
+
+                StringBuffer allcon = new StringBuffer();
+                InputStream is = null;
+                BufferedReader br = null;
+                OutputStream os = null;
+                BufferedWriter bw = null;
+
+                HttpClient client = new DefaultHttpClient();
+                try {
+                        HttpResponse response = client.execute(new HttpGet("http://localhost/index_template.html"));
+                        HttpEntity entity = response.getEntity();
+
+                        is = entity.getContent();
+                        br = new BufferedReader(new InputStreamReader(is, "utf-8"));
+                        String con = "";
+                        while ((con = br.readLine()) != null) {
+                                allcon.append(con + "\n");
+                        }
+
+                        StringBuffer content = new StringBuffer();
+                        StringBuffer hosts = new StringBuffer();
+                        StringBuffer pages = new StringBuffer();
+
+                        for (String s : MongoPool.findHost()) {
+                                JSONObject o = JSONObject.parseObject(s);
+                                hosts
+                                        .append("<li><a href=\"/host.html?id=")
+                                        .append(o.getString("path"))
+                                        .append("\" class=\"btn btn-primary btn-sm col-md-12\">")
+                                        .append(o.getString("name"))
+                                        .append("<span class=\"navbar-new\">")
+                                        .append(o.getString("clickCount"))
+                                        .append("</span></a></li>");
+                        }
+                        for (String s : MongoPool.findPaperTrend()) {
+                                JSONObject o = JSONObject.parseObject(s);
+                                content
+                                        .append("<li class=\"list-group-item\">")
+                                        .append("<span class=\"navbar-new\">")
+                                        .append(RequestParam.isNull(o.getString("total")) ? o.getJSONObject("goodCount").getString("$numberLong") : o.getString("total"))
+                                        .append("</span>")
+                                        .append("<dd><div class=\"media\"><div class=\"media-left\"><img src=\"")
+                                        .append(RequestParam.isNull(o.getString("imgUrl")) ? "img/bbcow.png" : o.getString("imgUrl"))
+                                        .append("\" width=\"64px\" height=\"64px\"></div><div class=\"media-body\">")
+                                        .append(RequestParam.isNull(o.getString("linkUrl")) ? "" : "<a class=\"text-info\" href=\"/middle.html?url=" + o.getString("linkUrl") + "\">")
+                                        .append("<p class=\"media-heading\">")
+                                        .append(o.getString("content"))
+                                        .append("</p>")
+                                        .append(RequestParam.isNull(o.getString("linkUrl")) ? "" : "</a>")
+                                        .append("<a class=\"text-muted\" href=\"/host.html?id=")
+                                        .append(RequestParam.isNull(o.getString("path")) ? "bb" : o.getString("path"))
+                                        .append("\">《")
+                                        .append(o.getString("title"))
+                                        .append("》  分享自：  <cite>")
+                                        .append(RequestParam.isNull(o.getString("hostName")) ? "八牛" : o.getString("hostName"))
+                                        .append("</cite></a></div></div></dd></li>");
+                        }
+
+                        File pf = new File(PATH + "page/");
+                        String[] pfs = pf.list(new FilenameFilter() {
+                                @Override
+                                public boolean accept(File dir, String name) {
+                                        return !name.startsWith("template");
+                                }
+                        });
+                        for (String s : pfs) {
+                                pages.append("<li><a href=\"/page/").append(s).append("\" class=\"btn btn-link btn-sm col-md-12\">").append(s).append("</a></li>");
+                        }
+
+                        allcon.insert(allcon.indexOf("#1") + 10, content.toString());
+                        allcon.insert(allcon.indexOf("#2") + 10, hosts.toString());
+                        allcon.insert(allcon.indexOf("#3") + 10, pages.toString());
+
+                        File f = new File(PATH + "index.html");
+
+                        os = new FileOutputStream(f);
+                        bw = new BufferedWriter(new OutputStreamWriter(os, "utf-8"));
+                        bw.write(allcon.toString());
+
+                        //通知抓取
+                        BaiduPing.site();
+
+                } catch (IOException e) {
+                        e.printStackTrace();
+                        log.error(e);
+                } finally {
+                        try {
+                                bw.close();
+                                os.close();
+                                is.close();
+                                br.close();
+                        } catch (IOException e) {
+                                e.printStackTrace();
+                        }
+                }
+        }
+
+        /**
+         * 静态页面生成
+         */
         public static void staticHtml(String date) {
 
                 StringBuffer allcon = new StringBuffer();
@@ -62,7 +172,7 @@ public class HtmlParser {
                                                 .replaceFirst("\\$post_linkUrl", "".equals(js.getString("linkUrl").trim()) ? "/" : js.getString("linkUrl"));
                         }
 
-                        File f = new File("/usr/share/nginx/html/page/" + date + ".html");
+                        File f = new File(PATH + "page/" + date + ".html");
                         os = new FileOutputStream(f);
                         bw = new BufferedWriter(new OutputStreamWriter(os, "utf-8"));
                         bw.write(str);
@@ -83,7 +193,8 @@ public class HtmlParser {
         }
 
         public static void main(String[] args) {
-                HtmlParser.staticHtml("2015-07-28");
+                MongoPool.init();
+                HtmlParser.staticIndex();
         }
 
         public static String getNews() {

@@ -20,6 +20,10 @@ import com.bbcow.platform.PlatformCache;
 public class RequestParam {
         private static Logger log = Logger.getLogger(RequestParam.class);
 
+        public static boolean isNull(String str) {
+                return str == null || "".equals(str.trim());
+        }
+
         /**
          * 返回Json
          * 格式：{"type":"","data":"{}"}

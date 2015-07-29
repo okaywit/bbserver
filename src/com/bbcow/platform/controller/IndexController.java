@@ -41,6 +41,7 @@ public class IndexController {
                 }
 
                 log.error("Loading index.html used " + (+System.currentTimeMillis() - t1) + " millions");
+
         }
 
         @OnMessage
