@@ -163,7 +163,7 @@ public class MongoPool {
                 FindIterable<Document> current =
                         db
                                 .getCollection("paper")
-                                .find(BsonDocument.parse("{createDate:{$gte:ISODate(\""+BusCache.sFormat.format(new Date())+"T00:00:00.00Z\")}}"))
+                                .find(BsonDocument.parse("{createDate:{$gte:ISODate(\"" + BusCache.sFormat.format(new Date()) + "T00:00:00.00Z\")}}"))
                                 .sort(BsonDocument.parse("{goodCount:-1}"))
                                 .limit(5);
                 final List<String> jsons = new LinkedList<String>();
@@ -299,6 +299,19 @@ public class MongoPool {
                 FindIterable<Document> iterable = db.getCollection("daily_main").find().sort(BsonDocument.parse("{createDate:-1}"));
                 Document document = iterable.first();
                 return document.toJson();
+        }
+
+        public static List<String> findAllMain() {
+                FindIterable<Document> iterable = db.getCollection("daily_main").find().sort(BsonDocument.parse("{createDate:-1}"));
+                final List<String> jsons = new LinkedList<String>();
+                iterable.forEach(new Block<Document>() {
+                        @Override
+                        public void apply(Document document) {
+                                jsons.add(document.toJson());
+                        }
+                });
+
+                return jsons;
         }
 
         public static String findGoogleNews() {

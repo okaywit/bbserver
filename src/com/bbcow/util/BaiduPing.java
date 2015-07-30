@@ -30,7 +30,7 @@ public class BaiduPing {
                 // 实例化HTTP方法
                 HttpPost request = new HttpPost("http://data.zz.baidu.com/urls?site=www.bbcow.com&token=hqjEuHTIHexJiPFt");
                 // 创建UrlEncodedFormEntity对象
-                StringEntity formEntiry = new StringEntity("http://www.bbcow.com/index.html");
+                StringEntity formEntiry = new StringEntity("http://www.bbcow.com/index.html /n http://www.bbcow.com/wiki.html");
                 request.setEntity(formEntiry);
                 // 执行请求
                 client.execute(request);

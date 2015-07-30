@@ -38,6 +38,7 @@ public class TimerControler {
                 @Override
                 public void run() {
                         MongoPool.insertDailyMain(HtmlParser.getWikiMain());
+                        HtmlParser.staticWiki();
                 }
 
         }

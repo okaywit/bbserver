@@ -30,6 +30,67 @@ public class HtmlParser {
 
         private static final String PATH = "/usr/share/nginx/html/";
 
+        public static void staticWiki() {
+                StringBuffer allcon = new StringBuffer();
+                InputStream is = null;
+                BufferedReader br = null;
+                OutputStream os = null;
+                BufferedWriter bw = null;
+
+                HttpClient client = new DefaultHttpClient();
+                try {
+                        HttpResponse response = client.execute(new HttpGet("http://localhost/template/wiki_template.html"));
+                        HttpEntity entity = response.getEntity();
+
+                        is = entity.getContent();
+                        br = new BufferedReader(new InputStreamReader(is, "utf-8"));
+                        String con = "";
+                        while ((con = br.readLine()) != null) {
+                                allcon.append(con + "\n");
+                        }
+
+                        StringBuffer content = new StringBuffer();
+                        //爬取有效主机
+                        for (String s : MongoPool.findAllMain()) {
+                                JSONObject o = JSONObject.parseObject(s);
+                                content
+                                        .append("<div style=\"height:300px\" class=\"thumbnail col-lg-3 col-md-3 col-xs-12 col-sm-12\"><a href=\"")
+                                        .append(o.getString("linkUrl"))
+                                        .append("\" target=\"_blank\" role=\"button\"><img src=\"")
+                                        .append(o.getString("imgUrl"))
+                                        .append("\" alt=\"")
+                                        .append(o.getString("title"))
+                                        .append("\"><div class=\"caption\"><h1>")
+                                        .append(o.getString("title"))
+                                        .append("</h1></div></a></div>");
+                        }
+
+                        allcon.insert(allcon.indexOf("#1") + 10, content.toString());
+
+                        File f = new File(PATH + "wiki.html");
+
+                        os = new FileOutputStream(f);
+                        bw = new BufferedWriter(new OutputStreamWriter(os, "utf-8"));
+                        bw.write(allcon.toString());
+
+                        //通知抓取
+                        BaiduPing.site();
+
+                } catch (IOException e) {
+                        e.printStackTrace();
+                        log.error(e);
+                } finally {
+                        try {
+                                bw.close();
+                                os.close();
+                                is.close();
+                                br.close();
+                        } catch (IOException e) {
+                                e.printStackTrace();
+                        }
+                }
+        }
+
         /**
          * 静态首页生成
          * 1.发表信息 2.投票
@@ -44,7 +105,7 @@ public class HtmlParser {
 
                 HttpClient client = new DefaultHttpClient();
                 try {
-                        HttpResponse response = client.execute(new HttpGet("http://localhost/index_template.html"));
+                        HttpResponse response = client.execute(new HttpGet("http://localhost/template/index_template.html"));
                         HttpEntity entity = response.getEntity();
 
                         is = entity.getContent();
@@ -57,7 +118,7 @@ public class HtmlParser {
                         StringBuffer content = new StringBuffer();
                         StringBuffer hosts = new StringBuffer();
                         StringBuffer pages = new StringBuffer();
-
+                        //爬取有效主机
                         for (String s : MongoPool.findHost()) {
                                 JSONObject o = JSONObject.parseObject(s);
                                 hosts
@@ -69,6 +130,7 @@ public class HtmlParser {
                                         .append(o.getString("clickCount"))
                                         .append("</span></a></li>");
                         }
+                        //爬取推荐
                         for (String s : MongoPool.findPaperTrend()) {
                                 JSONObject o = JSONObject.parseObject(s);
                                 content
@@ -92,16 +154,17 @@ public class HtmlParser {
                                         .append(RequestParam.isNull(o.getString("hostName")) ? "八牛" : o.getString("hostName"))
                                         .append("</cite></a></div></div></dd></li>");
                         }
-
+                        //爬取静态文件
                         File pf = new File(PATH + "page/");
                         String[] pfs = pf.list(new FilenameFilter() {
+
                                 @Override
                                 public boolean accept(File dir, String name) {
                                         return !name.startsWith("template");
                                 }
                         });
                         for (String s : pfs) {
-                                pages.append("<li><a href=\"/page/").append(s).append("\" class=\"btn btn-link btn-sm col-md-12\">").append(s).append("</a></li>");
+                                pages.append("<li><a href=\"/page/").append(s).append("\" class=\"\">").append(s).append("</a></li>");
                         }
 
                         allcon.insert(allcon.indexOf("#1") + 10, content.toString());
@@ -145,7 +208,7 @@ public class HtmlParser {
 
                 HttpClient client = new DefaultHttpClient();
                 try {
-                        HttpResponse response = client.execute(new HttpGet("http://localhost/page/template.html"));
+                        HttpResponse response = client.execute(new HttpGet("http://localhost/template/page_template.html"));
                         HttpEntity entity = response.getEntity();
                         is = entity.getContent();
                         br = new BufferedReader(new InputStreamReader(is, "utf-8"));
@@ -153,13 +216,13 @@ public class HtmlParser {
                         while ((con = br.readLine()) != null) {
                                 allcon.append(con + "\n");
                         }
-                        //MongoPool.init();
+
                         List<String> ss = MongoPool.findDailyTOP5();
                         String str = allcon.toString();
 
                         str = str.replaceFirst("\\$title", date + " TOP 5");
                         for (String s : ss) {
-                   
+
                                 JSONObject js = JSONObject.parseObject(s);
                                 js = js.getJSONObject("data");
                                 str =
