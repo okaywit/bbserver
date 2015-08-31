@@ -54,7 +54,7 @@ public class OpenController {
                         String uri = "ws://" + host.getIp() + ":" + host.getPort() + "/" + host.getPoint();
                         try {
                                 hostSession = container.connectToServer(new Host(), new URI(uri));
-                        } catch (DeploymentException | IOException | URISyntaxException e) {
+                        } catch (Exception e) {
                                 e.printStackTrace();
                         }
                 } else {

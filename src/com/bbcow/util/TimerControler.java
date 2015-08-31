@@ -17,6 +17,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.log4j.Logger;
 import org.bson.Document;
 
 import com.alibaba.fastjson.JSONArray;
@@ -25,20 +26,22 @@ import com.bbcow.BusCache;
 import com.bbcow.db.MongoPool;
 
 public class TimerControler {
+    	private static Logger log = Logger.getLogger(TimerControler.class);
         private static Timer t = new Timer();
 
         public static void init() {
-                t.schedule(new MainTask(), 0, 12 * 60 * 60 * 1000);
-                t.schedule(new BaiduTask(), 0, 6 * 60 * 60 * 1000);
+                t.schedule(new MainTask(), 0, 1 * 60 * 60 * 1000);
+                t.schedule(new BaiduTask(), 0, 1 * 60 * 60 * 1000);
                 t.schedule(new WeiboTask(), 0, 1 * 60 * 60 * 1000);
         }
 
         static class MainTask extends TimerTask {
-
+        		
                 @Override
                 public void run() {
                         MongoPool.insertDailyMain(HtmlParser.getWikiMain());
                         HtmlParser.staticWiki();
+                        log.error("mainTask finished " + System.currentTimeMillis());
                 }
 
         }
@@ -49,11 +52,13 @@ public class TimerControler {
                 public void run() {
                         try {
                                 String date = BusCache.sFormat.format(new Date());
-                                HtmlParser.staticHtml(date);
+                                //HtmlParser.staticHtml(date);
+                                HtmlParser.staticIndex();
                                 BaiduPing.site(date);
                         } catch (IOException e) {
                                 e.printStackTrace();
                         }
+                        log.error("BaiduTask finished " + System.currentTimeMillis());
                 }
 
         }
@@ -134,6 +139,7 @@ public class TimerControler {
                         } catch (IOException e) {
                                 e.printStackTrace();
                         }
+                        log.error("WeiboTask finished " + System.currentTimeMillis());
                 }
         }
 

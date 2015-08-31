@@ -10,6 +10,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -25,7 +31,7 @@ import com.bbcow.server.po.DailyMain;
 
 public class HtmlParser {
         private static Logger log = Logger.getLogger(HtmlParser.class);
-
+        final static SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
         //private static final String PATH = "D://html/bbhtml/";
 
         private static final String PATH = "/usr/share/nginx/html/";
@@ -163,7 +169,25 @@ public class HtmlParser {
                                         return !name.startsWith("template");
                                 }
                         });
-                        for (String s : pfs) {
+                        List<String> list = Arrays.asList(pfs);
+                        Collections.sort(list,new Comparator<String>() {
+							@Override
+							public int compare(String o1, String o2) {
+                        		try {
+                        			
+									Date d1 = HtmlParser.sf.parse(o1.substring(0,o1.lastIndexOf(".")));
+									Date d2 = HtmlParser.sf.parse(o2.substring(0,o2.lastIndexOf(".")));
+									if(d1.after(d2)){
+										return -1;
+									}
+								} catch (ParseException e) {
+									e.printStackTrace();
+								}
+								return 0;
+							}
+                        	
+						});
+                        for (String s : list) {
                                 pages.append("<li><a href=\"/page/").append(s).append("\" class=\"\">").append(s).append("</a></li>");
                         }
 
@@ -219,27 +243,30 @@ public class HtmlParser {
 
                         List<String> ss = MongoPool.findDailyTOP5();
                         String str = allcon.toString();
-
-                        str = str.replaceFirst("\\$title", date + " TOP 5");
-                        for (String s : ss) {
-
-                                JSONObject js = JSONObject.parseObject(s);
-                                js = js.getJSONObject("data");
-                                str =
-                                        str
-                                                .replaceFirst("\\$description", js.getString("title"))
-                                                .replaceFirst("hidden", "show")
-                                                .replaceFirst("\\$post_title", js.getString("title"))
-                                                .replaceFirst("\\$post_imgUrl", "".equals(js.getString("imgUrl")) ? "/img/bbcow.png" : js.getString("imgUrl"))
-                                                .replaceFirst("\\$post_content", js.getString("content"))
-                                                .replaceFirst("\\$post_linkUrl", "".equals(js.getString("linkUrl").trim()) ? "/" : js.getString("linkUrl"));
+                        if(ss!=null && ss.size()>0){
+	                        for (String s : ss) {
+	
+	                                JSONObject js = JSONObject.parseObject(s);
+	                                js = js.getJSONObject("data");
+	                                str =
+	                                        str
+	                                                .replaceFirst("\\$description", js.getString("title"))
+	                                                .replaceFirst("hidden", "show")
+	                                                .replaceFirst("\\$post_title", js.getString("title"))
+	                                                .replaceFirst("\\$post_imgUrl", "".equals(js.getString("imgUrl")) ? "/img/bbcow.png" : js.getString("imgUrl"))
+	                                                .replaceFirst("\\$post_content", js.getString("content"))
+	                                                .replaceFirst("\\$post_linkUrl", "".equals(js.getString("linkUrl").trim()) ? "/" : js.getString("linkUrl"));
+	                        }
+	                        str = str.replaceFirst("\\$title", "八牛头条  - "+date);
+	
+	                        File f = new File(PATH + "page/" + date + ".html");
+	                        os = new FileOutputStream(f);
+	                        bw = new BufferedWriter(new OutputStreamWriter(os, "utf-8"));
+	                        bw.write(str);
+	                        log.error("Create static html " + date + " has finished!");
+                        }else{
+                        	log.error("Didn't find news " + date);
                         }
-
-                        File f = new File(PATH + "page/" + date + ".html");
-                        os = new FileOutputStream(f);
-                        bw = new BufferedWriter(new OutputStreamWriter(os, "utf-8"));
-                        bw.write(str);
-                        log.error("Create static html " + date + " has finished!");
                 } catch (IOException e) {
                         e.printStackTrace();
                         log.error(e);
@@ -255,10 +282,6 @@ public class HtmlParser {
                 }
         }
 
-        public static void main(String[] args) {
-                MongoPool.init();
-                HtmlParser.staticIndex();
-        }
 
         public static String getNews() {
                 StringBuffer allcon = new StringBuffer();
@@ -337,5 +360,29 @@ public class HtmlParser {
                 }
                 return wm;
         }
+        public static void main(String[] args) {
+        	String[] pfs = {"2015-08-10.html","2015-07-10.html","2015-09-10.html"};
+        	List<String> list = Arrays.asList(pfs);
+        	Collections.sort(list,new Comparator<String>() {
+				@Override
+				public int compare(String o1, String o2) {
+            		try {
+						Date d1 = sf.parse(o1.substring(0,o1.lastIndexOf(".")));
+						Date d2 = sf.parse(o2.substring(0,o2.lastIndexOf(".")));
+						
+						if(d1.after(d2)){
+							return 1;
+						}
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+					return 0;
+				}
+            	
+			});
+            for (String s : list) {
+            	System.out.println(s);
+            }
+		}
 
 }
